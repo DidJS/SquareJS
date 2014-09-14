@@ -171,15 +171,6 @@ var SQUARE = (function(square) {
 			return overlap(obj1, obj2);
 		}	
 
-		that.getCollisionInformation = function(obj1, obj2) {
-			var borderInfo = this.getCollisionBorderInformation(obj1);
-			if (borderInfo === '') {
-				return this.getCollisionObjectInformation(obj1, obj2);
-			}
-
-			return borderInfo;
-		}
-
 		that.check = function(obj) {
 			var self = this;
 			var details;
