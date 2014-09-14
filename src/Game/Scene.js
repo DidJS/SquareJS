@@ -3,6 +3,7 @@ var SQUARE = (function(square) {
 		var that = {};
 		that.backgroundColor = { startingColor : '#ffffff', endingColor : '#ffffff', mode : 'vertical' };
 		that.children = [];
+		var _isPaused = false;
 
 		var collisionManager = square.getCollisionManager();
 
@@ -46,6 +47,14 @@ var SQUARE = (function(square) {
 
 		that.setBackgroundColor = function(color) {
 			this.backgroundColor.startingColor = this.backgroundColor.endingColor = color;
+		}
+
+		that.pause = function() {
+			_isPaused = !_isPaused;
+		}
+
+		that.isPaused = function() {
+			return _isPaused;
 		}
 
 		that.addChild = function(child) {

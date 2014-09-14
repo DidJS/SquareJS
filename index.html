@@ -20,12 +20,13 @@
 			font: 60px 'ChunkFiveRegular';
 		   }
 		</style>
+		<!--<script type="text/javascript" src="square.min.js" ></script>-->
 		<script type="text/javascript" src="src/Renderer/Renderer.js" ></script>
 		<script type="text/javascript" src="src/Collision/CollisionManager.js" ></script>
 		<script type="text/javascript" src="src/Game/Scene.js" ></script>
 		<script type="text/javascript" src="src/Game/GameObjects.js" ></script>
 	</head>
-	<body onload='drawScene()'>
+	<body onload='play()'>
 		<div id='title'>Squary adventure</div>
 		<div id='main-div'>
 			<canvas id="mycanvas" width="400" height="330" style="border:1px solid #000;">
@@ -47,148 +48,168 @@
 			var gravity = 0.4;
 			var bounce = 8;
 
-			var player = SQUARE.createBox({id : 'player', x : 10, y : 250, width : 10, height : 10, fillStyle : '#FF0000', gravity : gravity});
-			player.score = 0;
+			function play() {
+				var gameEnded = false;
 
-			var box1 = SQUARE.createBox({ id : 'box1', x : 100, y : 295, width : 30, height : 20});
-			var box2 = SQUARE.createBox({ id : 'box2', x : 150, y : 225, width : 30, height : 20});
-			var box3 = SQUARE.createBox({ id : 'box3', x : 100, y : 180, width : 30, height : 20, velX : 1, velY : 0, isVisible : false });
-			var box4 = SQUARE.createBox({ id : 'box4', x : 200, y : 120, width : 30, height : 20, velX : -1, velY : 0, isVisible : false});
-			var key = SQUARE.createBox({ id : 'key', x : 350, y : 40, width : 5, height : 10, fillStyle : '#008000'});
+				var player = SQUARE.createBox({id : 'player', x : 10, y : 250, width : 10, height : 10, fillStyle : '#FF0000', gravity : gravity});
+				player.score = 0;
 
-			var scoreText = SQUARE.createText({id : 'scoreText', text : 'score :', x : 20, y : 20, font : 'bold 18px cursive sans-serif', fontColor: 'yellow'});
-			var playerScoreText = SQUARE.createText({id : 'playerScoreText', text : player.score, x : 80, y : 20, font : 'bold 16px cursive sans-serif', fontColor: 'yellow'});
-			var winnerText = SQUARE.createText({id : 'winnerText', text : 'you win!', x : sceneWidth / 2, y : sceneHeight / 2, font : 'bold 24px cursive sans-serif', isVisible : false});
+				var box1 = SQUARE.createBox({ id : 'box1', x : 100, y : 295, width : 30, height : 20});
+				var box2 = SQUARE.createBox({ id : 'box2', x : 150, y : 225, width : 30, height : 20});
+				var box3 = SQUARE.createBox({ id : 'box3', x : 100, y : 180, width : 30, height : 20, velX : 1, velY : 0, isVisible : false });
+				var box4 = SQUARE.createBox({ id : 'box4', x : 200, y : 120, width : 30, height : 20, velX : -1, velY : 0, isVisible : false});
+				var key = SQUARE.createBox({ id : 'key', x : 350, y : 40, width : 5, height : 10, fillStyle : '#008000'});
 
-			var renderer = SQUARE.getRenderer('mycanvas');
+				var scoreText = SQUARE.createText({id : 'scoreText', text : 'score :', x : 20, y : 20, font : 'bold 18px cursive sans-serif', fontColor: 'yellow'});
+				var playerScoreText = SQUARE.createText({id : 'playerScoreText', text : player.score, x : 80, y : 20, font : 'bold 16px cursive sans-serif', fontColor: 'yellow'});
+				var winnerText = SQUARE.createText({id : 'winnerText', text : 'Rejouer? (O)', x : sceneWidth / 2 - 55, y : sceneHeight / 2, font : 'bold 24px cursive sans-serif', isVisible : false});
 
-			var scene = SQUARE.createScene();
-			scene.activeBorder(true);
-			//scene.setBackgroundColor('yellow');
-			scene.setGradientBackgroundColor({startingColor : 'grey', endingColor : 'lightblue', mode : 'horizontal'});
+				var renderer = SQUARE.getRenderer('mycanvas');
 
-			scene.addChild(player).addChild(box1).addChild(box2).addChild(box3).addChild(box4).addChild(key).addChild(winnerText);
-			scene.addChild(scoreText).addChild(playerScoreText);
+				var scene = SQUARE.createScene();
+				scene.activeBorder(true);
 
-			var keyboard = scene.keyboard.create();
+				scene.setGradientBackgroundColor({startingColor : 'grey', endingColor : 'lightblue', mode : 'horizontal'});
 
-			keyboard.when('keydown').then(function(key) {
-				if (key.keyCode === direction.RIGHT) {
-					player.velX = friction;
+				
+				var bonus = [];
+				for(var i = 1; i < 10; i++) {
+					var b = SQUARE.createCircle({x : 50 + (i * 15), y : 325, radius : 4});
+					scene.addChild(b);
+					bonus.push(b);
 				}
 
-				if (key.keyCode === direction.LEFT) {
-					player.velX = -friction;
+				for(var i = 1; i < 10; i++) {
+					var b = SQUARE.createCircle({x : 50, y : 100 + (i * 15), radius : 4});
+					scene.addChild(b);
+					bonus.push(b);
 				}
 
-				if (key.keyCode === direction.UP) {
-					if (!player.isJumping) {
-						player.velY = -bounce;
-						player.isJumping = true;
+				scene.addChild(player).addChild(box1).addChild(box2).addChild(box3).addChild(box4).addChild(key).addChild(winnerText);
+				scene.addChild(scoreText).addChild(playerScoreText);
+
+				var keyboard = scene.keyboard.create();
+
+				keyboard.when('keydown').then(function(key) {
+					if (!scene.isPaused()) {
+						if (key.keyCode === direction.RIGHT) {
+							player.velX = friction;
+						}
+
+						if (key.keyCode === direction.LEFT) {
+							player.velX = -friction;
+						}
+
+						if (key.keyCode === direction.UP) {
+							if (!player.isJumping) {
+								player.velY = -bounce;
+								player.isJumping = true;
+							}
+						}
 					}
-				}
-			})
 
-			keyboard.when('keyup').then(function(key) {
-				if (key.keyCode === direction.RIGHT || key.keyCode === direction.LEFT) {
-					player.velX = 0;
-				}
-			})
-
-
-			var bonus = [];
-			for(var i = 1; i < 10; i++) {
-				var b = SQUARE.createCircle({x : 50 + (i * 15), y : 325, radius : 4});
-				scene.addChild(b);
-				bonus.push(b);
-			}
-
-			for(var i = 1; i < 10; i++) {
-				var b = SQUARE.createCircle({x : 50, y : 100 + (i * 15), radius : 4});
-				scene.addChild(b);
-				bonus.push(b);
-			}
-			
-			scene.when(player).onCollisionWith([box1, box2, box3, box4]).then(function(info) {
-				if (info.where === 'bottom') {
-					player.velY = -player.velY;
-				}
-
-				if (info.where === 'top') {
-					player.isJumping = false;
-					player.position.y = info.collisioner.position.y - player.height;
-					player.position.x += info.collisioner.velX;
-					player.velY = 0;
-					if (info.collisioner.id === 'box2') {
-						box3.isVisible = box4.isVisible = true;
+					if (key.keyCode === 79) {
+						if (gameEnded) {
+							play();
+						}
 					}
-				}
+				
+					if (key.keyCode === 80) {
+						scene.pause();
+					}
+				})
 
-				if (info.where === 'left') {
-					player.isJumping = false;
-					player.position.x = info.collisioner.position.x - player.width;
-					player.velX = 0;
-				}
+				keyboard.when('keyup').then(function(key) {
+					if (key.keyCode === direction.RIGHT || key.keyCode === direction.LEFT) {
+						player.velX = 0;
+					}
+				})
+				
+				scene.when(player).onCollisionWith([box1, box2, box3, box4]).then(function(info) {
+					if (info.where === 'bottom') {
+						player.velY = -player.velY;
+					}
 
-				if (info.where === 'right') {
-					player.isJumping = false;
-					player.position.x = info.collisioner.position.x + info.collisioner.width;
-					player.velX = 0;
-				}
-			});
+					if (info.where === 'top') {
+						player.isJumping = false;
+						player.position.y = info.collisioner.position.y - player.height;
+						player.position.x += info.collisioner.velX;
+						player.velY = 0;
+						if (info.collisioner.id === 'box2') {
+							box3.isVisible = box4.isVisible = true;
+						}
+					}
 
-			scene.when(player).onCollisionWith([key]).then(function(info) {
-				winnerText.isVisible = true;
-				info.collisioner.isVisible = false;
-			});
+					if (info.where === 'left') {
+						player.isJumping = false;
+						player.position.x = info.collisioner.position.x - player.width;
+						player.velX = 0;
+					}
 
-			scene.when(player).onCollisionWith(bonus).then(function(info) {
-				info.collisioner.isVisible = false;
-				player.score += 5;
-				playerScoreText.text = player.score;
-				var infoBonus = SQUARE.createText({text : '+5', x : info.collisioner.position.x, y : info.collisioner.position.y, font : 'bold 8px cursive sans-serif', velY : -1});
-				scene.addChild(infoBonus);
-				scene.when(infoBonus).onCollisionWithBorder().then(function(info) {
-					if (info.where === 'borderTop') {
-						infoBonus.isVisible = false;
+					if (info.where === 'right') {
+						player.isJumping = false;
+						player.position.x = info.collisioner.position.x + info.collisioner.width;
+						player.velX = 0;
 					}
 				});
-			});
 
-			scene.when(box3).onCollisionWithBorder().then(function(info){
-				if (info.where === 'borderLeft' || info.where === 'borderRight') {
-					box3.velX = -box3.velX;
+				scene.when(player).onCollisionWith([key]).then(function(info) {
+					winnerText.isVisible = true;
+					info.collisioner.isVisible = false;
+					gameEnded = true;
+					scene.pause();
+				});
+
+				scene.when(player).onCollisionWith(bonus).then(function(info) {
+					info.collisioner.isVisible = false;
+					player.score += 5;
+					playerScoreText.text = player.score;
+					var infoBonus = SQUARE.createText({text : '+5', x : info.collisioner.position.x, y : info.collisioner.position.y, font : 'bold 8px cursive sans-serif', velY : -1});
+					scene.addChild(infoBonus);
+					scene.when(infoBonus).onCollisionWithBorder().then(function(info) {
+						if (info.where === 'borderTop') {
+							infoBonus.isVisible = false;
+						}
+					});
+				});
+
+				scene.when(box3).onCollisionWithBorder().then(function(info){
+					if (info.where === 'borderLeft' || info.where === 'borderRight') {
+						box3.velX = -box3.velX;
+					}
+				});
+
+				scene.when(box4).onCollisionWithBorder().then(function(info){
+					if (info.where === 'borderLeft' || info.where === 'borderRight') {
+						box4.velX = -box4.velX;
+					}
+				});
+
+				scene.when(player).onCollisionWithBorder().then(function(info) {
+					if (info.where === 'borderLeft') {
+						player.velX = 0;
+						player.position.x = 0;
+					}
+
+					if (info.where === 'borderRight') {
+						player.velX = 0;
+						player.position.x = sceneWidth - player.width;
+					}
+
+					if (info.where === 'borderBottom') {
+						player.velY = 0;
+						player.position.y = sceneHeight - player.height;
+						player.isJumping = false;
+					}
+				});
+
+				drawScene();
+
+				function drawScene() {
+					renderer.render(scene);
+
+					requestAnimationFrame(drawScene);
 				}
-			});
-
-			scene.when(box4).onCollisionWithBorder().then(function(info){
-				if (info.where === 'borderLeft' || info.where === 'borderRight') {
-					box4.velX = -box4.velX;
-				}
-			});
-
-			scene.when(player).onCollisionWithBorder().then(function(info) {
-				if (info.where === 'borderLeft') {
-					player.velX = 0;
-					player.position.x = 0;
-				}
-
-				if (info.where === 'borderRight') {
-					player.velX = 0;
-					player.position.x = sceneWidth - player.width;
-				}
-
-				if (info.where === 'borderBottom') {
-					player.velY = 0;
-					player.position.y = sceneHeight - player.height;
-					player.isJumping = false;
-				}
-			});
-
-			function drawScene() {
-				renderer.render(scene);
-
-				requestAnimationFrame(drawScene);
 			}
 
 		</script>
