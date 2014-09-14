@@ -9,6 +9,7 @@
     		 vertical-align: middle;
 		   }
 		</style>
+		<script type="text/javascript" src="src/Renderer/Renderer.js" ></script>
 	</head>
 	<body onload='drawScene()'>
 		<div id='main-div'>
@@ -63,31 +64,6 @@
 				return that;
 			}
 
-
-			function createRenderer(id) {
-				var canvas = document.getElementById(id);
-				var context = canvas.getContext('2d');
-				
-				var that = {};
-
-				that.render = function(scene) {
-					context.clearRect(0, 0, canvas.width, canvas.height);
-
-					for(var i = 0; i < scene.children.length; i++) {
-						if (scene.children[i].isVisible) {
-							scene.children[i].velY += scene.children[i].gravity;
-
-							scene.children[i].position.x += scene.children[i].velX;
-							scene.children[i].position.y += scene.children[i].velY;
-
-							scene.check(scene.children[i]);
-							scene.children[i].render(context);
-						}
-					}
-				}
-
-				return that;
-			}
 
 			function createBoxRenderer(obj) {
 
@@ -486,7 +462,7 @@
 			var winnerText = createText( {id : 'winnerText', text : 'you win!', x : sceneWidth / 2, y : sceneHeight / 2, font : 'bold 24px cursive sans-serif', isVisible : false});
 			var circle1 = createCircle({id : 'circle1', x : 30, y : 300, radius : 10});
 
-			var renderer = createRenderer('mycanvas');
+			var renderer = SQUARE.createRenderer('mycanvas');
 
 			var scene = createScene();
 			scene.activeBorder(true);
