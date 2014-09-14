@@ -1,9 +1,28 @@
 var SQUARE = (function(square) {
 	square.createScene = function() {
 		var that = {};
+		that.backgroundColor = { startingColor : '#ffffff', endingColor : '#ffffff', mode : 'vertical' };
 		that.children = [];
 
 		var collisionManager = square.getCollisionManager();
+
+		that.keyboard = {
+			create : function() {
+				var that = {};
+
+				that.when = function(e) {
+					var self = this;
+					return {
+						then : function(callback) {
+							window.addEventListener(e, callback);
+						}
+					}
+				}
+
+				return that;
+			}
+			
+		};
 
 		function getChild(obj) {
 			var child;
@@ -21,11 +40,33 @@ var SQUARE = (function(square) {
 			collisionManager.setBorderCollisionModeOn(activeBorderCollision);
 		}
 
+		that.setGradientBackgroundColor = function(spec) {
+			this.backgroundColor = spec;
+		}
+
+		that.setBackgroundColor = function(color) {
+			this.backgroundColor.startingColor = this.backgroundColor.endingColor = color;
+		}
+
 		that.addChild = function(child) {
 			if (!getChild(child)) {
 				this.children.push(child);
 			}
 			return this;
+		}
+
+		that.removeChild = function(child) {
+			var index;
+			for(var i = 0; i < this.children.length; i++) {
+				if (this.children[i].id === obj.id) {
+					index = i;
+					break;
+				}
+			}
+
+			if (index) {
+				this.children.splice(index, 1);
+			}
 		}
 
 		that.check = function(obj) {

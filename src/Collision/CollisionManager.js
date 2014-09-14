@@ -39,14 +39,22 @@ var SQUARE = (function(square) {
 			return false;
 		};
 
+		function isCollidingOnTop(obj) {
+			if (borderInfo) {
+				return obj.position.y < borderInfo.minY;
+			}
+			
+			return false;
+		};
+
 		function boxCollision(obj1, obj2) {
-			var c1X = obj1.position.x + obj1.halfWidth;
-			var c2X = obj2.position.x + obj2.halfWidth;
+			var c1X = obj1.getCenterPositionX();
+			var c2X = obj2.getCenterPositionX();
 
 			var overlapX = (obj1.halfWidth + obj2.halfWidth) - Math.abs(c1X - c2X); // distance entre les centres en X
 
-			var c1Y = obj1.position.y + obj1.halfHeight;
-			var c2Y = obj2.position.y + obj2.halfHeight;
+			var c1Y = obj1.getCenterPositionY();
+			var c2Y = obj2.getCenterPositionY();
 
 			var overlapY = (obj1.halfHeight + obj2.halfHeight) - Math.abs(c1Y - c2Y); // distance entre les centres en Y
 
@@ -151,6 +159,9 @@ var SQUARE = (function(square) {
 			}
 			if (isCollidingOnGround(obj)) {
 				return 'borderBottom';
+			} 
+			if (isCollidingOnTop(obj)) {
+				return 'borderTop';
 			} 
 
 			return '';

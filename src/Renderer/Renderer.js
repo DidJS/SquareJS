@@ -7,6 +7,18 @@ var SQUARE = (function(square) {
 
 		that.render = function(scene) {
 			context.clearRect(0, 0, canvas.width, canvas.height);
+			context.rect(0, 0, canvas.width, canvas.height);
+			var grd;
+			if (scene.backgroundColor.mode === 'horizontal') {
+				grd = context.createLinearGradient(0, 0, 0, canvas.height);
+			}
+			else {
+				grd = context.createLinearGradient(0, 0, canvas.width, 0);
+			}
+	        grd.addColorStop(0, scene.backgroundColor.startingColor);   
+	        grd.addColorStop(1, scene.backgroundColor.endingColor);
+	        context.fillStyle = grd;
+	        context.fill();
 
 			for(var i = 0; i < scene.children.length; i++) {
 				if (scene.children[i].isVisible) {
@@ -43,6 +55,7 @@ var SQUARE = (function(square) {
 		
 		that.render = function(context) {
 			context.font = obj.font;
+			context.fillStyle = obj.fontColor;
 			context.fillText(obj.text, obj.position.x, obj.position.y);
 		}
 
@@ -58,7 +71,6 @@ var SQUARE = (function(square) {
 		    context.closePath();
 		    context.fillStyle = 'green';
 		    context.fill();
-		    //context.stroke();
 		}
 
 		return that;

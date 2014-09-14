@@ -37,6 +37,15 @@ var SQUARE = (function(square) {
 		that.height = spec.height;
 		that.halfWidth = that.width / 2;
 		that.halfHeight = that.height / 2;
+
+		that.getCenterPositionX = function() {
+			return this.position.x + this.halfWidth;
+		}
+
+		that.getCenterPositionY = function() {
+			return this.position.y + this.halfHeight;
+		}
+
 		var renderer = this.createBoxRenderer(that);
 		that.render = function(context) {
 			renderer.render(context);
@@ -54,6 +63,14 @@ var SQUARE = (function(square) {
 
 		that.halfWidth = that.radius;
 		that.halfHeight = that.radius;
+
+		that.getCenterPositionX = function() {
+			return this.position.x;
+		}
+
+		that.getCenterPositionY = function() {
+			return this.position.y;
+		}
 
 		var renderer = this.createCircleRenderer(that);
 
@@ -85,6 +102,13 @@ var SQUARE = (function(square) {
 
 		that.text = spec.text;
 		that.font = spec.font || 'bold 12px sans-serif';
+		that.fontColor = spec.fontColor || '#000000'
+
+		that.getCenterPositionX = function() {
+		}
+
+		that.getCenterPositionY = function() {
+		}
 
 		var renderer = this.createTextRenderer(that);
 		that.render = function(context) {
