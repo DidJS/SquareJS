@@ -14,7 +14,7 @@ var SQUARE = (function(square) {
 
 		that.id = spec.id || Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5);
 		that.position = this.createPosition({x : spec.x, y : spec.y});
-		that.fillStyle = spec.fillStyle || '#000000';
+		that.fillStyle = spec.fillStyle || 'none';
 		that.velX = spec.velX || 0;
 		that.velY = spec.velY || 0;
 		that.gravity = spec.gravity || 0;

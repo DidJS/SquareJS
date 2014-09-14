@@ -47,8 +47,13 @@ var SQUARE = (function(square) {
 
 		that.render = function(context) {
 			context.beginPath();
-			context.fillStyle = obj.fillStyle;
-			context.fillRect(obj.position.x, obj.position.y, obj.width, obj.height);
+			if (obj.fillStyle !== 'none') {
+				context.fillStyle = obj.fillStyle;
+				context.fillRect(obj.position.x, obj.position.y, obj.width, obj.height);
+			}
+			else {
+				context.rect(obj.position.x, obj.position.y, obj.width, obj.height);
+			}
 			context.closePath();
 			context.stroke();
 		}
@@ -75,8 +80,10 @@ var SQUARE = (function(square) {
 			context.beginPath();
 		    context.arc(obj.position.x, obj.position.y, obj.radius, 0, 2 * Math.PI, false);
 		    context.closePath();
-		    context.fillStyle = 'green';
-		    context.fill();
+		    if (obj.fillStyle !== 'none') {
+			    context.fillStyle = 'green';
+			}
+			context.fill();
 		}
 
 		return that;
