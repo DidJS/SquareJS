@@ -82,6 +82,8 @@ var SQUARE = (function(square) {
 						return 'top';
 					}
 				}
+
+				return '';
 			}
 			else {
 				var c1X = obj1.position.x + obj1.halfWidth;

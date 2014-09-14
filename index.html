@@ -42,7 +42,7 @@
 			var box4 = SQUARE.createBox({ id : 'box4', x : 200, y : 120, width : 30, height : 20, velX : -1, velY : 0, isVisible : false});
 			var key = SQUARE.createBox({ id : 'key', x : 350, y : 40, width : 20, height : 50, fillStyle : '#008000'});
 			var winnerText = SQUARE.createText( {id : 'winnerText', text : 'you win!', x : sceneWidth / 2, y : sceneHeight / 2, font : 'bold 24px cursive sans-serif', isVisible : false});
-			var circle1 = SQUARE.createCircle({id : 'circle1', x : 30, y : 300, radius : 10});
+			var circle1 = SQUARE.createCircle({id : 'circle1', x : 50, y : 300, radius : 10});
 
 			var renderer = SQUARE.getRenderer('mycanvas');
 
@@ -85,7 +85,7 @@
 			});
 
 			scene.when(player).onCollisionWith([circle1]).then(function(info) {
-
+				//info.collisioner.isVisible = false;
 			});
 
 			scene.when(box3).onCollisionWithBorder().then(function(info){
