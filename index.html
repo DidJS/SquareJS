@@ -10,6 +10,9 @@
 		   }
 		</style>
 		<script type="text/javascript" src="src/Renderer/Renderer.js" ></script>
+		<script type="text/javascript" src="src/Collision/CollisionManager.js" ></script>
+		<script type="text/javascript" src="src/Game/Scene.js" ></script>
+		<script type="text/javascript" src="src/Game/GameObjects.js" ></script>
 	</head>
 	<body onload='drawScene()'>
 		<div id='main-div'>
@@ -28,445 +31,26 @@
 
 	        var sceneWidth = 400, sceneHeight = 330;
 
-			// var velX = 0, velY = 0;
 			var friction = 1.6;
 			var gravity = 0.4;
 			var bounce = 8;
 
-			function createGameObject(spec) {
-				var that = {};
-				var collisionObjects = [];
-
-				that.id = spec.id || Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5);
-				that.position = createPosition({x : spec.x, y : spec.y});
-				that.fillStyle = spec.fillStyle || '#000000';
-				that.velX = spec.velX || 0;
-				that.velY = spec.velY || 0;
-				that.gravity = spec.gravity || 0;
-				that.isVisible = true;
-				if (spec.isVisible === false) {
-					that.isVisible = false;
-				}
-
-				that.renderer = function(renderer) {
-
-				}
-
-				return that;
-			}
-
-			function createPosition(spec) {
-				var that = {};
-
-				that.x = spec.x;
-				that.y = spec.y;
-
-				return that;
-			}
-
-
-			function createBoxRenderer(obj) {
-
-				var that = {};
-
-				that.render = function(context) {
-					context.fillStyle = obj.fillStyle;
-					context.fillRect(obj.position.x, obj.position.y, obj.width, obj.height);
-					context.stroke();
-				}
-
-				return that;
-			}
-
-			function createTextRenderer(obj) {
-				var that = {};
-				
-				that.render = function(context) {
-					context.font = obj.font;
-					context.fillText(obj.text, obj.position.x, obj.position.y);
-				}
-
-				return that;
-			}
-
-			function createCircleRenderer(obj) {
-				var that = {};
-
-				that.render = function(context) {
-					context.beginPath();
-				    context.arc(obj.position.x, obj.position.y, obj.radius, 0, 2 * Math.PI, false);
-				    context.fillStyle = 'green';
-				    context.fill();
-				    context.stroke();
-				}
-
-				return that;
-			}
-
-			function createBox(spec) {
-				var that = createGameObject(spec);
-				
-				that.width = spec.width;
-				that.height = spec.height;
-				that.halfWidth = that.width / 2;
-				that.halfHeight = that.height / 2;
-				var renderer = createBoxRenderer(that);
-				that.render = function(context) {
-					renderer.render(context);
-				}
-
-				return that;
-			}
-
-			function createCircle(spec) {
-				var that = createGameObject(spec);
-
-				that.type = 'circle';
-				that.radius = spec.radius;
-				that.diameter = spec.radius * 2;
-
-				that.halfWidth = that.radius;
-				that.halfHeight = that.radius;
-
-				var renderer = createCircleRenderer(that);
-
-				that.render = function(context) {
-					renderer.render(context);
-				}
-
-				that.isInVoronoiRegion1 = function(obj) {
-					return this.position.x < obj.position.x && this.position.y < obj.position.y;
-				}
-
-				that.isInVoronoiRegion2 = function(obj) {
-					return this.position.x > obj.position.x + obj.width && this.position.y < obj.position.y;
-				}
-
-				that.isInVoronoiRegion3 = function(obj) {
-					return this.position.x > obj.position.x + obj.width && this.position.y > obj.position.y + obj.height;
-				}
-
-				that.isInVoronoiRegion4 = function(obj) {
-					return this.position.x < obj.position.x && this.position.y > obj.position.y + obj.height;
-				}
-
-				return that;
-			}
-
-			function createText(spec) {
-				var that = createGameObject(spec);
-
-				that.text = spec.text;
-				that.font = spec.font || 'bold 12px sans-serif';
-
-				var renderer = createTextRenderer(that);
-				that.render = function(context) {
-					renderer.render(context);
-				}
-
-				return that;
-			}
-
-			function createCollisionManager() {
-				var that = {};
-				var borderInfo;
-				var borderObjects = [];
-				var hashBehaviours = [];
-
-				function createBehaviour(spec) {
-					var that = {};
-
-					that.collisionObjects = spec.collisionObjects;
-					that.callback = spec.callback;
-					that.isForBorder = spec.isForBorder;
-
-					return that;
-				}
-
-				function isCollidingOnBorderLeft(obj) {
-					if (borderInfo) {
-						return obj.position.x < borderInfo.minX;
-					}
-					
-					return false;
-				};
-
-				function isCollidingOnBorderRight(obj) {
-					if (borderInfo) {
-						return obj.position.x + obj.width > borderInfo.x;
-					}
-					
-					return false;
-				};
-
-				function isCollidingOnGround(obj) {
-					if (borderInfo) {
-						return obj.position.y + obj.height > borderInfo.y;
-					}
-					
-					return false;
-				};
-
-				function overlap(obj1, obj2) {
-					if (obj2.type === 'circle') {
-						var region1 = obj2.isInVoronoiRegion1(obj1);
-						var region2 = obj2.isInVoronoiRegion2(obj1);
-						var region3 = obj2.isInVoronoiRegion3(obj1);
-						var region4 = obj2.isInVoronoiRegion4(obj1);
-
-						if (region2 === true) {
-							var vertex = createPosition({x : obj1.position.x + obj1.width, y : obj1.position.y});
-							var dX = Math.abs(obj2.position.x - vertex.x);
-							var dY = Math.abs(obj2.position.y - vertex.y);
-
-							if (dX < obj2.radius && dY < obj2.radius) {
-								return 'bottom';
-							}
-						}
-						if (region1 === true) {
-							var vertex = createPosition({x : obj1.position.x, y : obj1.position.y});
-							var dX = Math.abs(obj2.position.x - vertex.x);
-							var dY = Math.abs(obj2.position.y - vertex.y);
-
-							if (dX < obj2.radius && dY < obj2.radius) {
-								return 'bottom';
-							}
-						}
-						if (region3 === true) {
-							var vertex = createPosition({x : obj1.position.x + obj1.width, y : obj1.position.y + obj1.width});
-							var dX = Math.abs(obj2.position.x - vertex.x);
-							var dY = Math.abs(obj2.position.y - vertex.y);
-
-							if (dX < obj2.radius && dY < obj2.radius) {
-								return 'top';
-							}
-						}
-						if (region4 === true) {
-							var vertex = createPosition({x : obj1.position.x, y : obj1.position.y + obj1.width});
-							var dX = Math.abs(obj2.position.x - vertex.x);
-							var dY = Math.abs(obj2.position.y - vertex.y);
-
-							if (dX < obj2.radius && dY < obj2.radius) {
-								return 'top';
-							}
-						}
-					}
-					else {
-						var c1X = obj1.position.x + obj1.halfWidth;
-						var c2X = obj2.position.x + obj2.halfWidth;
-
-						var overlapX = (obj1.halfWidth + obj2.halfWidth) - Math.abs(c1X - c2X); // distance entre les centres en X
-
-						var c1Y = obj1.position.y + obj1.halfHeight;
-						var c2Y = obj2.position.y + obj2.halfHeight;
-
-						var overlapY = (obj1.halfHeight + obj2.halfHeight) - Math.abs(c1Y - c2Y); // distance entre les centres en Y
-
-						if (overlapX <= 0 || overlapY <= 0) {
-							return '';
-						}
-						
-						if (overlapX < overlapY) {
-							if (c1X - c2X < 0) {
-								return 'left';
-							}
-							return 'right';
-						}
-						else {
-							if (c1Y - c2Y < 0) {
-								return 'top';
-							}
-							return 'bottom';
-						}
-					}
-				}
-
-				that.setBorderCollisionModeOn = function(activeBorder) {
-					if (activeBorder) {
-						borderInfo = {};
-
-						borderInfo.minX = 0;
-						borderInfo.x = sceneWidth;
-						borderInfo.minY = 0;
-						borderInfo.y = sceneHeight;
-					}
-					else {
-						delete borderInfo;
-					}
-				}
-
-
-				that.getCollisionBorderInformation = function(obj) {
-					
-					if (isCollidingOnBorderRight(obj)) {
-						return 'borderRight';
-					} 
-					if (isCollidingOnBorderLeft(obj)) {
-						return 'borderLeft';
-					}
-					if (isCollidingOnGround(obj)) {
-						return 'borderBottom';
-					} 
-
-					return '';
-				}
-
-				that.getCollisionObjectInformation = function(obj1, obj2) {
-					return overlap(obj1, obj2);
-				}	
-
-				that.getCollisionInformation = function(obj1, obj2) {
-					var borderInfo = this.getCollisionBorderInformation(obj1);
-					if (borderInfo === '') {
-						return this.getCollisionObjectInformation(obj1, obj2);
-					}
-
-					return borderInfo;
-				}
-
-				that.check = function(obj) {
-					var self = this;
-					var details;
-					var currentCObj = findInHashBehaviours(obj);
-
-					if (currentCObj) {
-						var info = '';
-						currentCObj.behaviours.forEach(function(behaviour) {
-							if (!behaviour.isForBorder) {
-								behaviour.collisionObjects.forEach(function(collisioner) {
-									if (collisioner.isVisible) {
-										info = self.getCollisionObjectInformation(obj, collisioner);
-										if (info !== '') {
-											behaviour.callback(
-											{
-												collisioner : collisioner,
-												where : info
-											});
-										}
-									}
-								});
-							}
-							else {
-								info = self.getCollisionBorderInformation(obj);
-								if (info !== '' && behaviour.callback) {
-									behaviour.callback(
-									{
-										where : info
-									});
-								}
-							}
-						});
-					}
-				}
-
-				that.registerBehaviourForBorder = function(behaviour) {
-					var b = findInHashBehaviours(behaviour.subject);
-					if (!b) {
-						b = {};
-						b = behaviour.subject;
-						b.behaviours = [];
-						hashBehaviours.push(b);
-					}
-
-					b.behaviours.push(createBehaviour({collisionObjects : [], callback : behaviour.callback, isForBorder : true}));
-				}
-
-				var findInHashBehaviours = function(obj) {
-					var behaviour = null;
-					for(var i = 0; i < hashBehaviours.length; i++) {
-						if(hashBehaviours[i].id === obj.id) {
-							behaviour = hashBehaviours[i];
-							break;
-						}
-					}
-
-					return behaviour;
-				}
-
-				that.registerBehaviour = function(behaviour) {
-					var b = findInHashBehaviours(behaviour.subject);
-					if(!b) {
-						b = {};
-						b = behaviour.subject;
-						b.behaviours = [];
-						hashBehaviours.push(b);
-					}
-
-					b.behaviours.push(createBehaviour({collisionObjects : behaviour.objects, callback : behaviour.callback, isForBorder : false}));
-				}
-
-				return that;
-			}
-
-			function createScene() {
-				var that = {};
-				that.children = [];
-
-				var collisionManager = createCollisionManager();
-
-				function getChild(obj) {
-					var child;
-					for(var i = 0; i < that.children.length; i++) {
-						if (that.children[i].id === obj.id) {
-							child = that.children[i];
-							break;
-						}
-					}
-
-					return child;
-				}
-
-				that.activeBorder = function(activeBorderCollision) {
-					collisionManager.setBorderCollisionModeOn(activeBorderCollision);
-				}
-
-				that.addChild = function(child) {
-					if (!getChild(child)) {
-						this.children.push(child);
-					}
-					return this;
-				}
-
-				that.check = function(obj) {
-					collisionManager.check(obj);
-				}
-
-				that.when = function(obj) {
-					return {
-						onCollisionWith : function(collisionObjects) {
-							return {
-								then : function(callback) {
-									collisionManager.registerBehaviour({subject : obj, objects : collisionObjects, callback : callback});
-								}
-							};
-						},
-						onCollisionWithBorder : function() {
-							return {
-								then : function(callback) {
-									collisionManager.registerBehaviourForBorder({subject : obj, callback : callback});
-								}
-							};
-						}
-					}
-				}
-
-				return that;
-			}
-
-			var player = createBox({id : 'player', x : 10, y : 250, width : 10, height : 10, fillStyle : '#FF0000', gravity : gravity});
-			var box1 = createBox({ id : 'box1', x : 100, y : 295, width : 30, height : 20});
-			var box2 = createBox({ id : 'box2', x : 150, y : 225, width : 30, height : 20});
-			var box3 = createBox({ id : 'box3', x : 100, y : 180, width : 30, height : 20, velX : 1, velY : 0, isVisible : false });
-			var box4 = createBox({ id : 'box4', x : 200, y : 120, width : 30, height : 20, velX : -1, velY : 0, isVisible : false});
-			var key = createBox({ id : 'key', x : 350, y : 40, width : 20, height : 50, fillStyle : '#008000'});
-			var winnerText = createText( {id : 'winnerText', text : 'you win!', x : sceneWidth / 2, y : sceneHeight / 2, font : 'bold 24px cursive sans-serif', isVisible : false});
-			var circle1 = createCircle({id : 'circle1', x : 30, y : 300, radius : 10});
-
-			var renderer = SQUARE.createRenderer('mycanvas');
-
-			var scene = createScene();
+			var player = SQUARE.createBox({id : 'player', x : 10, y : 250, width : 10, height : 10, fillStyle : '#FF0000', gravity : gravity});
+			var box1 = SQUARE.createBox({ id : 'box1', x : 100, y : 295, width : 30, height : 20});
+			var box2 = SQUARE.createBox({ id : 'box2', x : 150, y : 225, width : 30, height : 20});
+			var box3 = SQUARE.createBox({ id : 'box3', x : 100, y : 180, width : 30, height : 20, velX : 1, velY : 0, isVisible : false });
+			var box4 = SQUARE.createBox({ id : 'box4', x : 200, y : 120, width : 30, height : 20, velX : -1, velY : 0, isVisible : false});
+			var key = SQUARE.createBox({ id : 'key', x : 350, y : 40, width : 20, height : 50, fillStyle : '#008000'});
+			var winnerText = SQUARE.createText( {id : 'winnerText', text : 'you win!', x : sceneWidth / 2, y : sceneHeight / 2, font : 'bold 24px cursive sans-serif', isVisible : false});
+			var circle1 = SQUARE.createCircle({id : 'circle1', x : 30, y : 300, radius : 10});
+
+			var renderer = SQUARE.getRenderer('mycanvas');
+
+			var scene = SQUARE.createScene();
 			scene.activeBorder(true);
+
 			scene.addChild(player).addChild(box1).addChild(box2).addChild(box3).addChild(box4).addChild(key).addChild(winnerText).addChild(circle1);
+			
 			scene.when(player).onCollisionWith([box1, box2, box3, box4]).then(function(info) {
 				if (info.where === 'bottom') {
 					player.velY = -player.velY;
@@ -502,7 +86,7 @@
 
 			scene.when(player).onCollisionWith([circle1]).then(function(info) {
 
-			})
+			});
 
 			scene.when(box3).onCollisionWithBorder().then(function(info){
 				if (info.where === 'borderLeft' || info.where === 'borderRight') {
@@ -535,7 +119,6 @@
 			});
 
 			function drawScene() {
-				
 				renderer.render(scene);
 
 				requestAnimationFrame(drawScene);
