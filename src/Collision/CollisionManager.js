@@ -52,13 +52,17 @@ var SQUARE = (function(square) {
 			var c2X = obj2.getCenterPositionX();
 
 			var overlapX = (obj1.halfWidth + obj2.halfWidth) - Math.abs(c1X - c2X); // distance entre les centres en X
+			
+			if (overlapX <= 0) {
+				return '';
+			}
 
 			var c1Y = obj1.getCenterPositionY();
 			var c2Y = obj2.getCenterPositionY();
 
 			var overlapY = (obj1.halfHeight + obj2.halfHeight) - Math.abs(c1Y - c2Y); // distance entre les centres en Y
 
-			if (overlapX <= 0 || overlapY <= 0) {
+			if (overlapY <= 0) {
 				return '';
 			}
 			
@@ -78,20 +82,7 @@ var SQUARE = (function(square) {
 
 		function circleWithBoxCollision(obj1, obj2) {
 			var region1 = obj2.isInVoronoiRegion1(obj1);
-			var region2 = obj2.isInVoronoiRegion2(obj1);
-			var region3 = obj2.isInVoronoiRegion3(obj1);
-			var region4 = obj2.isInVoronoiRegion4(obj1);
-
-			if (region2 === true) {
-				var vertex = square.createPosition({x : obj1.position.x + obj1.width, y : obj1.position.y});
-				var dX = Math.abs(obj2.position.x - vertex.x);
-				var dY = Math.abs(obj2.position.y - vertex.y);
-
-				if (dX < obj2.radius && dY < obj2.radius) {
-					return 'bottom';
-				}
-			}
-			else if (region1 === true) {
+			if (region1 === true) {
 				var vertex = square.createPosition({x : obj1.position.x, y : obj1.position.y});
 				var dX = Math.abs(obj2.position.x - vertex.x);
 				var dY = Math.abs(obj2.position.y - vertex.y);
@@ -100,28 +91,46 @@ var SQUARE = (function(square) {
 					return 'bottom';
 				}
 			}
-			else if (region3 === true) {
-				var vertex = square.createPosition({x : obj1.position.x + obj1.width, y : obj1.position.y + obj1.width});
-				var dX = Math.abs(obj2.position.x - vertex.x);
-				var dY = Math.abs(obj2.position.y - vertex.y);
-
-				if (dX < obj2.radius && dY < obj2.radius) {
-					return 'top';
-				}
-			}
-			else if (region4 === true) {
-				var vertex = square.createPosition({x : obj1.position.x, y : obj1.position.y + obj1.width});
-				var dX = Math.abs(obj2.position.x - vertex.x);
-				var dY = Math.abs(obj2.position.y - vertex.y);
-
-				if (dX < obj2.radius && dY < obj2.radius) {
-					return 'top';
-				}
-			}
 			else {
-				return boxCollision(obj1, obj2);
-			}
+				var region2 = obj2.isInVoronoiRegion2(obj1);
+				if (region2 === true) {
+					var vertex = square.createPosition({x : obj1.position.x + obj1.width, y : obj1.position.y});
+					var dX = Math.abs(obj2.position.x - vertex.x);
+					var dY = Math.abs(obj2.position.y - vertex.y);
 
+					if (dX < obj2.radius && dY < obj2.radius) {
+						return 'bottom';
+					}
+				}
+				else {
+					var region3 = obj2.isInVoronoiRegion3(obj1);
+					if (region3 === true) {
+						var vertex = square.createPosition({x : obj1.position.x + obj1.width, y : obj1.position.y + obj1.width});
+						var dX = Math.abs(obj2.position.x - vertex.x);
+						var dY = Math.abs(obj2.position.y - vertex.y);
+
+						if (dX < obj2.radius && dY < obj2.radius) {
+							return 'top';
+						}
+					}
+					else {
+						var region4 = obj2.isInVoronoiRegion4(obj1);
+						if (region4 === true) {
+							var vertex = square.createPosition({x : obj1.position.x, y : obj1.position.y + obj1.width});
+							var dX = Math.abs(obj2.position.x - vertex.x);
+							var dY = Math.abs(obj2.position.y - vertex.y);
+
+							if (dX < obj2.radius && dY < obj2.radius) {
+								return 'top';
+							}
+						}
+						else {
+							return boxCollision(obj1, obj2);
+						}
+					}
+				}
+			}
+			
 			return '';
 		}
 
