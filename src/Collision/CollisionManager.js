@@ -134,9 +134,43 @@ var SQUARE = (function(square) {
 			return '';
 		}
 
+		function triangleWithBoxCollision(box, triangle) {
+			var directionVector = null;
+			var positionToCheck1 = null;
+			var positionToCheck2 = null;
+			var projectedOverlap = false;
+
+			if (triangle.center.position.x > box.getCenterPositionX()) {
+				directionVector = triangle.directionVector1;
+				positionToCheck1 = box.position;
+				positionToCheck2 = square.createPosition({x : box.position.x + box.width, y : box.position.y + box.height});
+				position1 = triangle.getProjectedVector(positionToCheck1, directionVector);
+				position2 = triangle.getProjectedVector(positionToCheck2, directionVector);
+				projectedOverlap = position2.x > triangle.commonVertex.x && position2.y > triangle.commonVertex.y;
+			}
+			else {
+				directionVector = triangle.directionVector2;
+				positionToCheck1 = square.createPosition({x : box.position.x, y : box.position.y + box.height});
+				positionToCheck2 = square.createPosition({x : box.position.x + box.width, y : box.position.y});
+				position1 = triangle.getProjectedVector(positionToCheck1, directionVector);
+				position2 = triangle.getProjectedVector(positionToCheck2, directionVector);
+				projectedOverlap = position1.x < triangle.commonVertex.x && position1.y > triangle.commonVertex.y;
+			}
+			
+			var widthOverlap = triangle.position.x < box.position.x + box.width;
+			var heightOverlap = triangle.position.y < box.position.y + box.height;
+			if ((projectedOverlap && widthOverlap) || (projectedOverlap && heightOverlap)) {
+				return 'left';
+			}
+			return '';
+		}
+
 		function overlap(obj1, obj2) {
 			if (obj2.type === 'circle') {
 				return circleWithBoxCollision(obj1, obj2);
+			}
+			else if (obj2.type === 'triangle') {
+				return triangleWithBoxCollision(obj1, obj2);
 			}
 			else {
 				return boxCollision(obj1, obj2);

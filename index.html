@@ -66,6 +66,9 @@
 				var winnerText = SQUARE.createText({id : 'winnerText', text : 'Gagné! Rejouer? (O)', x : sceneWidth / 2 - 85, y : sceneHeight / 2, font : 'bold 24px cursive sans-serif', isVisible : false, fontColor: 'crimson'});
 				var pauseText = SQUARE.createText({id : 'pauseText', text : 'Pause...', x : sceneWidth / 2 - 55, y : sceneHeight / 2, font : 'bold 24px cursive sans-serif', isVisible : false, fontColor: 'crimson'});
 
+
+				var triangle1 = SQUARE.createTriangle({x : 250, y : 330, vertex1 : {x : 270, y : 330}, vertex2 : {x : 260, y : 320}, vertex3 : {x : 250, y : 330}, fillStyle : '#000000'});
+
 				var renderer = SQUARE.getRenderer('mycanvas');
 
 				var scene = SQUARE.createScene();
@@ -88,6 +91,7 @@
 
 				scene.addChild(player).addChild(box1).addChild(box2).addChild(box3).addChild(box4).addChild(goal).addChild(winnerText).addChild(pauseText);
 				scene.addChild(scoreText).addChild(playerScoreText);
+				scene.addChild(triangle1);
 
 				var keyboard = scene.keyboard.create();
 
@@ -125,6 +129,12 @@
 					if (key.keyCode === direction.RIGHT || key.keyCode === direction.LEFT) {
 						player.velX = 0;
 					}
+				})
+
+				scene.when(player).onCollisionWith([triangle1]).then(function(info) {
+					winnerText.isVisible = true;
+					gameEnded = true;
+					scene.pause();
 				})
 				
 				scene.when(player).onCollisionWith([box1, box2, box3, box4]).then(function(info) {

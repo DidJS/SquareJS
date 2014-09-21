@@ -54,6 +54,117 @@ var SQUARE = (function(square) {
 		return that;
 	}
 
+	square.createTriangle = function(spec) {
+		// spec.x = spec.vertex1.x;
+		// spec.y = spec.vertex1.y;
+
+		var that = this.createGameObject(spec);
+		that.type = 'triangle';
+
+		that.vertex1 = this.createPosition(spec.vertex1);
+		that.vertex2 = this.createPosition(spec.vertex2);
+		that.vertex3 = this.createPosition(spec.vertex3);
+
+		that.directionVector1 = null;
+		that.directionVector2 = null;
+		that.commonVertex = null;
+
+		(function() {
+			var tabLength = [];
+
+			var lengthV1V2 = {v1 : spec.vertex1, v2 : spec.vertex2, length : Math.sqrt((spec.vertex2.x - spec.vertex1.x) * (spec.vertex2.x - spec.vertex1.x) + ((spec.vertex2.y - spec.vertex1.y) * (spec.vertex2.y - spec.vertex1.y)))};
+			var lengthV1V3 = {v1 : spec.vertex1, v2 : spec.vertex3, length : Math.sqrt((spec.vertex3.x - spec.vertex1.x) * (spec.vertex3.x - spec.vertex1.x) + ((spec.vertex3.y - spec.vertex1.y) * (spec.vertex3.y - spec.vertex1.y)))};
+			var lengthV2V3 = {v1 : spec.vertex2, v2 : spec.vertex3, length : Math.sqrt((spec.vertex3.x - spec.vertex2.x) * (spec.vertex3.x - spec.vertex2.x) + ((spec.vertex3.y - spec.vertex2.y) * (spec.vertex3.y - spec.vertex2.y)))};
+
+			tabLength.push(lengthV1V2);
+			tabLength.push(lengthV1V3);
+			tabLength.push(lengthV2V3);
+
+
+			function getIndexMax(tab) {
+				var maxLength = tab[0].length;
+				var index = 0;
+				for (var i = 0; i < tab.length; i++) {
+					if (maxLength < tab[i].length) {
+						maxLength = tab[i].length;
+						index = i;
+					}
+				};
+
+				return index;
+			}
+			
+			var index = getIndexMax(tabLength);
+			tabLength.splice(index, 1);
+
+			var countCommonVertices = [];
+
+			function findVertex(vertex) {
+				var foundVertex = null;
+				for (var i = 0; i < countCommonVertices.length; i++) {
+					if (countCommonVertices[i].vertex === vertex) {
+						foundVertex = countCommonVertices[i];
+						break;
+					}
+				}
+				return foundVertex;
+			}
+
+			for (var i = 0; i < tabLength.length; i++) {
+				var vertex = findVertex(tabLength[i].v1);
+				if (vertex === null) {
+					countCommonVertices.push({vertex : tabLength[i].v1, count : 1});
+				}
+				else {
+					vertex.count++;
+				}
+
+				vertex = findVertex(tabLength[i].v2);
+				if (vertex === null) {
+					countCommonVertices.push({vertex : tabLength[i].v2, count : 1});
+				}
+				else {
+					vertex.count++;
+				}
+			}
+
+			var maxCountVertex = countCommonVertices[0].count;
+
+			for (var i = 0; i < countCommonVertices.length; i++) {
+				if (maxCountVertex < countCommonVertices[i].count) {
+					maxCountVertex = countCommonVertices[i].count;
+					that.commonVertex = countCommonVertices[i].vertex;
+				}
+			}
+
+			that.directionVector1 = square.createPosition({x : tabLength[0].v2.x - tabLength[0].v1.x, y : tabLength[0].v2.y - tabLength[0].v1.y});
+			that.directionVector2 = square.createPosition({x : tabLength[1].v2.x - tabLength[1].v1.x, y : tabLength[1].v2.y - tabLength[1].v1.y});
+			
+		})();
+		
+		that.getProjectedVector = function(initialVector, directionVector) {
+			var lambda = (directionVector.x * (initialVector.x - that.commonVertex.x) + directionVector.y * (initialVector.y - that.commonVertex.y)) / (directionVector.x * directionVector.x + directionVector.y * directionVector.y)
+			var x = that.commonVertex.x + lambda * directionVector.x;
+			var y = that.commonVertex.y + lambda * directionVector.y;
+
+			return square.createPosition({x : x, y : y});
+		}
+
+		that.center = {position : square.createPosition({x : (that.vertex1.x + that.vertex2.x + that.vertex3.x) / 3, y : (that.vertex1.y + that.vertex2.y + that.vertex3.y) / 3})};
+
+		that.width = 0;
+		that.height = 0;
+		that.halfWidth = 0;
+		that.halfHeight = 0;
+
+		var renderer = this.createTriangleRenderer(that);
+		that.render = function(context) {
+			renderer.render(context);
+		}
+
+		return that;
+	}
+
 	square.createCircle = function(spec) {
 		var that = this.createGameObject(spec);
 

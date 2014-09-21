@@ -61,6 +61,27 @@ var SQUARE = (function(square) {
 		return that;
 	}
 
+	square.createTriangleRenderer = function(obj) {
+		var that = {};
+
+		that.render = function(context) {
+			context.beginPath();
+		    context.moveTo(obj.position.x, obj.position.y);
+		    context.lineTo(obj.vertex1.x, obj.vertex1.y);
+		    context.lineTo(obj.vertex2.x, obj.vertex2.y);
+		    context.lineTo(obj.vertex3.x, obj.vertex3.y);
+		    if (obj.fillStyle !== 'none') {
+				context.fillStyle = obj.fillStyle;
+				context.fill();
+			}
+			else {
+		    	context.stroke();
+			}
+		}
+
+		return that;
+	}
+
 	square.createTextRenderer = function(obj) {
 		var that = {};
 		
