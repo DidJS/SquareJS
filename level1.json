@@ -1,0 +1,30 @@
+{
+	"player" : {
+		"id" : "player",
+		"x" : 10,
+		"y" : 250,
+		"width" : 10,
+		"height" : 10,
+		"fillStyle" : "SaddleBrown",
+		"gravity" : 0.4,
+		"score" : 0
+	},
+	"boxes" : [
+		{
+			"id" : "box1", 
+			"x" : 100, 
+			"y" : 295, 
+			"width" : 30, 
+			"height" : 20, 
+			"fillStyle" : "#000000"
+		},
+		{
+			"id" : "box2", 
+			"x" : 150, 
+			"y" : 225, 
+			"width" : 30, 
+			"height" : 20, 
+			"fillStyle" : "#000000"
+		}
+	]
+}

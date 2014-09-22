@@ -1,0 +1,229 @@
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>Squary Adventure</title>
+		<style>
+			body {
+				background-color: lightblue;
+			}
+			#main-div {
+		     width: 400px;
+		     height:330px;
+		     margin: 0px auto;
+		     margin-top: 70px;
+    		 vertical-align: middle;
+
+		   }
+		   #title {
+		   	text-align: center;
+		   	color: #fff;
+			text-shadow: 0px 1px 0px #999, 0px 2px 0px #888, 0px 3px 0px #777, 0px 4px 0px #666, 0px 5px 0px #555, 0px 6px 0px #444, 0px 7px 0px #333, 0px 8px 7px #001135;
+			font: 60px 'ChunkFiveRegular';
+		   }
+		</style>
+		<script type="text/javascript" src="square.min.js" ></script>
+		<!--<script type="text/javascript" src="src/Renderer/Renderer.js" ></script>
+		<script type="text/javascript" src="src/Collision/CollisionManager.js" ></script>
+		<script type="text/javascript" src="src/Game/Scene.js" ></script>
+		<script type="text/javascript" src="src/Game/GameObjects.js" ></script>-->
+	</head>
+	<body onload='play()'>
+		<div id='title'>Squary adventure</div>
+		<div id='main-div'>
+			<canvas id="mycanvas" width="400" height="330" style="border:1px solid #000;">
+				Your browser does not support canvas!
+			</canvas>	
+		</div>
+		<script>
+
+			var direction = {
+	            RIGHT : 39,
+	            LEFT  : 37,
+	            UP    : 38,
+	            DOWN  : 40
+	        };
+
+	        var sceneWidth = 400, sceneHeight = 330;
+
+			var friction = 1.6;
+			var gravity = 0.4;
+			var bounce = 8;
+
+			function play() {
+				var gameEnded = false;
+
+				var player = SQUARE.createBox({id : 'player', x : 10, y : 250, width : 10, height : 10, fillStyle : 'SaddleBrown', gravity : gravity});
+				player.score = 0;
+
+				var box1 = SQUARE.createBox({ id : 'box1', x : 100, y : 295, width : 30, height : 20, fillStyle : '#000000'});
+				var box2 = SQUARE.createBox({ id : 'box2', x : 150, y : 225, width : 30, height : 20, fillStyle : '#000000'});
+				var box3 = SQUARE.createBox({ id : 'box3', x : 100, y : 180, width : 30, height : 20, velX : 1, velY : 0, isVisible : false, fillStyle : '#000000' });
+				var box4 = SQUARE.createBox({ id : 'box4', x : 200, y : 120, width : 30, height : 20, velX : -1, velY : 0, isVisible : false, fillStyle : '#000000'});
+				var goal = SQUARE.createBox({ id : 'goal', x : 350, y : 40, width : 6, height : 15});
+
+				var scoreText = SQUARE.createText({id : 'scoreText', text : 'score :', x : 20, y : 20, font : 'bold 18px cursive sans-serif', fontColor: 'yellow'});
+				var playerScoreText = SQUARE.createText({id : 'playerScoreText', text : player.score, x : 80, y : 20, font : 'bold 16px cursive sans-serif', fontColor: 'yellow'});
+				var winnerText = SQUARE.createText({id : 'winnerText', text : 'Gagné! Rejouer? (O)', x : sceneWidth / 2 - 85, y : sceneHeight / 2, font : 'bold 24px cursive sans-serif', isVisible : false, fontColor: 'crimson'});
+				var pauseText = SQUARE.createText({id : 'pauseText', text : 'Pause...', x : sceneWidth / 2 - 55, y : sceneHeight / 2, font : 'bold 24px cursive sans-serif', isVisible : false, fontColor: 'crimson'});
+
+
+				var triangle1 = SQUARE.createTriangle({x : 250, y : 330, vertex1 : {x : 270, y : 330}, vertex2 : {x : 260, y : 320}, vertex3 : {x : 250, y : 330}, fillStyle : '#000000'});
+
+				var renderer = SQUARE.getRenderer('mycanvas');
+
+				var scene = SQUARE.createScene();
+				scene.activeBorder(true);
+
+				scene.setGradientBackgroundColor({startingColor : 'grey', endingColor : 'lightblue', mode : 'horizontal'});
+
+				var bonus = [];
+				for(var i = 1; i < 10; i++) {
+					var b = SQUARE.createCircle({x : 50 + (i * 15), y : 325, radius : 4, fillStyle : '#008000'});
+					scene.addChild(b);
+					bonus.push(b);
+				}
+
+				for(var i = 1; i < 10; i++) {
+					var b = SQUARE.createCircle({x : 50, y : 100 + (i * 15), radius : 4, fillStyle : '#008000'});
+					scene.addChild(b);
+					bonus.push(b);
+				}
+
+				scene.addChild(player).addChild(box1).addChild(box2).addChild(box3).addChild(box4).addChild(goal).addChild(winnerText).addChild(pauseText);
+				scene.addChild(scoreText).addChild(playerScoreText);
+				scene.addChild(triangle1);
+
+				var keyboard = scene.keyboard.create();
+
+				keyboard.when('keydown').then(function(key) {
+					if (!scene.isPaused()) {
+						if (key.keyCode === direction.RIGHT) {
+							player.velX = friction;
+						}
+
+						if (key.keyCode === direction.LEFT) {
+							player.velX = -friction;
+						}
+
+						if (key.keyCode === direction.UP) {
+							if (!player.isJumping) {
+								player.velY = -bounce;
+								player.isJumping = true;
+							}
+						}
+					}
+
+					if (key.keyCode === 79) {
+						if (gameEnded) {
+							play();
+						}
+					}
+				
+					if (key.keyCode === 80) {
+						scene.pause();
+						pauseText.isVisible = !pauseText.isVisible
+					}
+				})
+
+				keyboard.when('keyup').then(function(key) {
+					if (key.keyCode === direction.RIGHT || key.keyCode === direction.LEFT) {
+						player.velX = 0;
+					}
+				})
+
+				scene.when(player).onCollisionWith([triangle1]).then(function(info) {
+					winnerText.isVisible = true;
+					gameEnded = true;
+					scene.pause();
+				})
+				
+				scene.when(player).onCollisionWith([box1, box2, box3, box4]).then(function(info) {
+					if (info.where === 'bottom') {
+						player.velY = -player.velY;
+					}
+
+					if (info.where === 'top') {
+						player.isJumping = false;
+						player.position.y = info.collisioner.position.y - player.height;
+						player.position.x += info.collisioner.velX;
+						player.velY = 0;
+						if (info.collisioner.id === 'box2') {
+							box3.isVisible = box4.isVisible = true;
+						}
+					}
+
+					if (info.where === 'left') {
+						player.isJumping = false;
+						player.position.x = info.collisioner.position.x - player.width;
+						player.velX = 0;
+					}
+
+					if (info.where === 'right') {
+						player.isJumping = false;
+						player.position.x = info.collisioner.position.x + info.collisioner.width;
+						player.velX = 0;
+					}
+				});
+
+				scene.when(player).onCollisionWith([goal]).then(function(info) {
+					winnerText.isVisible = true;
+					info.collisioner.isVisible = false;
+					gameEnded = true;
+					scene.pause();
+				});
+
+				scene.when(player).onCollisionWith(bonus).then(function(info) {
+					info.collisioner.isVisible = false;
+					player.score += 5;
+					playerScoreText.text = player.score;
+					var infoBonus = SQUARE.createText({text : '+5', x : info.collisioner.position.x, y : info.collisioner.position.y, font : 'bold 8px cursive sans-serif', velY : -1});
+					scene.addChild(infoBonus);
+					scene.when(infoBonus).onCollisionWithBorder().then(function(info) {
+						if (info.where === 'borderTop') {
+							infoBonus.isVisible = false;
+						}
+					});
+				});
+
+				scene.when(box3).onCollisionWithBorder().then(function(info){
+					if (info.where === 'borderLeft' || info.where === 'borderRight') {
+						box3.velX = -box3.velX;
+					}
+				});
+
+				scene.when(box4).onCollisionWithBorder().then(function(info){
+					if (info.where === 'borderLeft' || info.where === 'borderRight') {
+						box4.velX = -box4.velX;
+					}
+				});
+
+				scene.when(player).onCollisionWithBorder().then(function(info) {
+					if (info.where === 'borderLeft') {
+						player.velX = 0;
+						player.position.x = 0;
+					}
+
+					if (info.where === 'borderRight') {
+						player.velX = 0;
+						player.position.x = sceneWidth - player.width;
+					}
+
+					if (info.where === 'borderBottom') {
+						player.velY = 0;
+						player.position.y = sceneHeight - player.height;
+						player.isJumping = false;
+					}
+				});
+
+				drawScene();
+
+				function drawScene() {
+					renderer.render(scene);
+
+					requestAnimationFrame(drawScene);
+				}
+			}
+
+		</script>
+	</body>
+</html>
