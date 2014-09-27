@@ -2,7 +2,7 @@
 	"player" : {
 		"id" : "player",
 		"x" : 10,
-		"y" : 250,
+		"y" : 200,
 		"width" : 10,
 		"height" : 10,
 		"fillStyle" : "SaddleBrown",
@@ -10,21 +10,154 @@
 		"score" : 0
 	},
 	"boxes" : [
-		{
-			"id" : "box1", 
-			"x" : 100, 
-			"y" : 295, 
-			"width" : 30, 
+		{ 
+			"x" : 0, 
+			"y" : 310, 
+			"width" : 200, 
 			"height" : 20, 
 			"fillStyle" : "#000000"
 		},
 		{
-			"id" : "box2", 
-			"x" : 150, 
-			"y" : 225, 
-			"width" : 30, 
+			"x" : 240, 
+			"y" : 310, 
+			"width" : 160, 
 			"height" : 20, 
 			"fillStyle" : "#000000"
+		},
+		{
+			"x" : 50, 
+			"y" : 260, 
+			"width" : 39, 
+			"height" : 20, 
+			"fillStyle" : "#000000"
+		}
+	],
+	"triangles" : [
+		{
+			"x" : 200,
+			"y" : 330,
+			"vertex1" : {
+				"x" : 220,
+				"y" : 330
+			},
+			"vertex2" : {
+				"x" : 210,
+				"y" : 310
+			},
+			"vertex3" : {
+				"x" : 200, 
+				"y" : 330
+			},
+			"fillStyle" : "#000000"
+		},
+		{
+			"x" : 220,
+			"y" : 330,
+			"vertex1" : {
+				"x" : 240,
+				"y" : 330
+			},
+			"vertex2" : {
+				"x" : 230,
+				"y" : 310
+			},
+			"vertex3" : {
+				"x" : 220, 
+				"y" : 330
+			},
+			"fillStyle" : "#000000"
+		}
+	],
+	"circles" : [
+		{
+			"x" : 50, 
+			"y" : 305, 
+			"radius" : 4, 
+			"fillStyle" : "#008000"
+		},
+		{
+			"x" : 54, 
+			"y" : 253, 
+			"radius" : 4, 
+			"fillStyle" : "#008000"
+		},
+		{
+			"x" : 69, 
+			"y" : 253, 
+			"radius" : 4, 
+			"fillStyle" : "#008000"
+		},
+		{
+			"x" : 84, 
+			"y" : 253, 
+			"radius" : 4, 
+			"fillStyle" : "#008000"
+		},
+		{
+			"x" : 65, 
+			"y" : 305, 
+			"radius" : 4, 
+			"fillStyle" : "#008000"
+		},
+		{
+			"x" : 80, 
+			"y" : 305, 
+			"radius" : 4, 
+			"fillStyle" : "#008000"
+		},
+		{
+			"x" : 95, 
+			"y" : 305, 
+			"radius" : 4, 
+			"fillStyle" : "#008000"
+		},
+		{
+			"x" : 110, 
+			"y" : 305, 
+			"radius" : 4, 
+			"fillStyle" : "#008000"
+		},
+		{
+			"x" : 125, 
+			"y" : 305, 
+			"radius" : 4, 
+			"fillStyle" : "#008000"
+		},
+		{
+			"x" : 140, 
+			"y" : 305, 
+			"radius" : 4, 
+			"fillStyle" : "#008000"
+		},
+		{
+			"x" : 155, 
+			"y" : 305, 
+			"radius" : 4, 
+			"fillStyle" : "#008000"
+		},
+		{
+			"x" : 170, 
+			"y" : 305, 
+			"radius" : 4, 
+			"fillStyle" : "#008000"
+		},
+		{
+			"x" : 185, 
+			"y" : 305, 
+			"radius" : 4, 
+			"fillStyle" : "#008000"
+		},
+		{
+			"x" : 205, 
+			"y" : 285, 
+			"radius" : 4, 
+			"fillStyle" : "#008000"
+		},
+		{
+			"x" : 235, 
+			"y" : 285, 
+			"radius" : 4, 
+			"fillStyle" : "#008000"
 		}
 	]
 }

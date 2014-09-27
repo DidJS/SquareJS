@@ -86,9 +86,109 @@
 					scene.setGradientBackgroundColor({startingColor : 'grey', endingColor : 'lightblue', mode : 'horizontal'});
 
 					scene.addChild(player);
+					var boxes = [];
 					for (var i = 0; i < obj.boxes.length; i++) {
-						scene.addChild(SQUARE.createBox(obj.boxes[i]));
+						var box = SQUARE.createBox(obj.boxes[i]);
+						boxes.push(box);
+						scene.addChild(box);
 					}
+
+					var triangles = [];
+
+					for (var i = 0; i < obj.triangles.length; i++) {
+						var triangle = SQUARE.createTriangle(obj.triangles[i]);
+						triangles.push(triangle);
+						scene.addChild(triangle);
+					}
+
+					var circles = [];
+
+					for (var i = 0; i < obj.circles.length; i++) {
+						var circle = SQUARE.createCircle(obj.circles[i]);
+						circles.push(circle);
+						scene.addChild(circle);
+					}
+
+					var keyboard = scene.keyboard.create();
+
+					keyboard.when('keydown').then(function(key) {
+						if (!scene.isPaused()) {
+							if (key.keyCode === direction.RIGHT) {
+								player.velX = friction;
+							}
+
+							if (key.keyCode === direction.LEFT) {
+								player.velX = -friction;
+							}
+
+							if (key.keyCode === direction.UP) {
+								if (!player.isJumping) {
+									player.velY = -bounce;
+									player.isJumping = true;
+								}
+							}
+						}
+
+						if (key.keyCode === 79) {
+							if (gameEnded) {
+								play();
+							}
+						}
+					
+						if (key.keyCode === 80) {
+							scene.pause();
+							pauseText.isVisible = !pauseText.isVisible
+						}
+					})
+
+					keyboard.when('keyup').then(function(key) {
+						if (key.keyCode === direction.RIGHT || key.keyCode === direction.LEFT) {
+							player.velX = 0;
+						}
+					})
+
+					scene.when(player).onCollisionWith(boxes).then(function(info) {
+						if (info.where === 'bottom') {
+							player.velY = -player.velY;
+						}
+
+						if (info.where === 'top') {
+							player.isJumping = false;
+							player.position.y = info.collisioner.position.y - player.height;
+							player.position.x += info.collisioner.velX;
+							player.velY = 0;
+						}
+
+						if (info.where === 'left') {
+							player.isJumping = false;
+							player.position.x = info.collisioner.position.x - player.width;
+							player.velX = 0;
+						}
+
+						if (info.where === 'right') {
+							player.isJumping = false;
+							player.position.x = info.collisioner.position.x + info.collisioner.width;
+							player.velX = 0;
+						}
+					});
+
+					scene.when(player).onCollisionWith(triangles).then(function(info) {
+						//winnerText.isVisible = true;
+						gameEnded = true;
+						scene.pause();
+					});
+
+					scene.when(player).onCollisionWith(circles).then(function(info) {
+						info.collisioner.isVisible = false;
+						player.score += 5;
+						var infoBonus = SQUARE.createText({text : '+5', x : info.collisioner.position.x, y : info.collisioner.position.y, font : 'bold 8px cursive sans-serif', velY : -1});
+						scene.addChild(infoBonus);
+						scene.when(infoBonus).onCollisionWithBorder().then(function(info) {
+							if (info.where === 'borderTop') {
+								infoBonus.isVisible = false;
+							}
+						});
+					});
 
 					drawScene();
 
