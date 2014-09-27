@@ -1,21 +1,9 @@
 var SQUARE = (function(square) {
-	square.getCollisionManager = function() {
+
+	square.createBorderCollisionManager = function(borderInfo) {
 		var that = {};
-		var borderInfo;
-		var borderObjects = [];
-		var hashBehaviours = [];
 
-		function createBehaviour(spec) {
-			var that = {};
-
-			that.collisionObjects = spec.collisionObjects;
-			that.callback = spec.callback;
-			that.isForBorder = spec.isForBorder;
-
-			return that;
-		}
-
-		function isCollidingOnBorderLeft(obj) {
+		that.isCollidingOnBorderLeft = function(obj) {
 			if (borderInfo) {
 				return obj.position.x < borderInfo.minX;
 			}
@@ -23,7 +11,7 @@ var SQUARE = (function(square) {
 			return false;
 		};
 
-		function isCollidingOnBorderRight(obj) {
+		that.isCollidingOnBorderRight = function(obj) {
 			if (borderInfo) {
 				return obj.position.x + obj.width > borderInfo.x;
 			}
@@ -31,7 +19,7 @@ var SQUARE = (function(square) {
 			return false;
 		};
 
-		function isCollidingOnGround(obj) {
+		that.isCollidingOnGround = function(obj) {
 			if (borderInfo) {
 				return obj.position.y + obj.height > borderInfo.y;
 			}
@@ -39,7 +27,7 @@ var SQUARE = (function(square) {
 			return false;
 		};
 
-		function isCollidingOnTop(obj) {
+		that.isCollidingOnTop = function(obj) {
 			if (borderInfo) {
 				return obj.position.y < borderInfo.minY;
 			}
@@ -47,7 +35,13 @@ var SQUARE = (function(square) {
 			return false;
 		};
 
-		function boxCollision(obj1, obj2) {
+		return that;
+	}
+
+	square.createBoxCollisionManager = function() {
+		var that = {};
+
+		that.boxWithBoxCollision = function(obj1, obj2) {
 			var c1X = obj1.getCenterPositionX();
 			var c2X = obj2.getCenterPositionX();
 
@@ -80,7 +74,13 @@ var SQUARE = (function(square) {
 			}
 		}
 
-		function circleWithBoxCollision(obj1, obj2) {
+		return that;
+	}
+
+	square.createCircleCollisionManager = function(boxCollisionManager) {
+		var that = {};
+
+		that.circleWithBoxCollision = function(obj1, obj2) {
 			var region1 = obj2.isInVoronoiRegion1(obj1);
 			if (region1 === true) {
 				var vertex = square.createPosition({x : obj1.position.x, y : obj1.position.y});
@@ -125,7 +125,7 @@ var SQUARE = (function(square) {
 							}
 						}
 						else {
-							return boxCollision(obj1, obj2);
+							return boxCollisionManager.boxWithBoxCollision(obj1, obj2);
 						}
 					}
 				}
@@ -134,7 +134,13 @@ var SQUARE = (function(square) {
 			return '';
 		}
 
-		function triangleWithBoxCollision(box, triangle) {
+		return that;
+	}
+
+	square.createTriangleCollisionManager = function() {
+		var that = {};
+
+		that.triangleWithBoxCollision = function(box, triangle) {
 			var directionVector = null;
 			var positionToCheck1 = null;
 			var positionToCheck2 = null;
@@ -158,54 +164,87 @@ var SQUARE = (function(square) {
 			}
 			
 			var widthOverlap = triangle.position.x < box.position.x + box.width;
-			var heightOverlap = triangle.position.y < box.position.y + box.height;
-			if ((projectedOverlap && widthOverlap) || (projectedOverlap && heightOverlap)) {
+			//var heightOverlap = triangle.position.y < box.position.y + box.height;
+
+			// var c1X = box.getCenterPositionX();
+			// var c2X = triangle.base.x;
+
+			// var overlapX = (box.halfWidth + (triangle.width / 2)) - Math.abs(c1X - c2X); // distance entre les centres en X
+
+			var c1Y = box.getCenterPositionY();
+			var c2Y = triangle.base.y;
+
+			var overlapY = (box.halfHeight + (triangle.height / 2)) - Math.abs(c1Y - c2Y); // distance entre les centres en 
+			var heightOverlap = overlapY > 0;
+
+			if (projectedOverlap && widthOverlap && heightOverlap) {
 				return 'left';
 			}
 			return '';
 		}
 
+		return that;
+	}
+
+	square.getCollisionManager = function() {
+		var that = {};
+		var borderObjects = [];
+		var hashBehaviours = [];
+		var borderCollisionManager;
+		var boxCollisionManager = square.createBoxCollisionManager();
+		var circleCollisionManager = square.createCircleCollisionManager(boxCollisionManager);
+		var triangleCollisionManager = square.createTriangleCollisionManager();
+
+		function createBehaviour(spec) {
+			var that = {};
+
+			that.collisionObjects = spec.collisionObjects;
+			that.callback = spec.callback;
+			that.isForBorder = spec.isForBorder;
+
+			return that;
+		}
+
 		function overlap(obj1, obj2) {
 			if (obj2.type === 'circle') {
-				return circleWithBoxCollision(obj1, obj2);
+				return circleCollisionManager.circleWithBoxCollision(obj1, obj2);
 			}
 			else if (obj2.type === 'triangle') {
-				return triangleWithBoxCollision(obj1, obj2);
+				return triangleCollisionManager.triangleWithBoxCollision(obj1, obj2);
 			}
 			else {
-				return boxCollision(obj1, obj2);
+				return boxCollisionManager.boxWithBoxCollision(obj1, obj2);
 			}
 		}
 
 		that.setBorderCollisionModeOn = function(activeBorder) {
 			if (activeBorder) {
-				borderInfo = {};
+				var borderInfo = {};
 
 				borderInfo.minX = 0;
 				borderInfo.x = sceneWidth;
 				borderInfo.minY = 0;
 				borderInfo.y = sceneHeight;
-			}
-			else {
-				delete borderInfo;
+
+				borderCollisionManager = square.createBorderCollisionManager(borderInfo);
 			}
 		}
 
-
 		that.getCollisionBorderInformation = function(obj) {
-			
-			if (isCollidingOnBorderRight(obj)) {
-				return 'borderRight';
-			} 
-			if (isCollidingOnBorderLeft(obj)) {
-				return 'borderLeft';
+			if (borderCollisionManager) {
+				if (borderCollisionManager.isCollidingOnBorderRight(obj)) {
+					return 'borderRight';
+				} 
+				if (borderCollisionManager.isCollidingOnBorderLeft(obj)) {
+					return 'borderLeft';
+				}
+				if (borderCollisionManager.isCollidingOnGround(obj)) {
+					return 'borderBottom';
+				} 
+				if (borderCollisionManager.isCollidingOnTop(obj)) {
+					return 'borderTop';
+				} 
 			}
-			if (isCollidingOnGround(obj)) {
-				return 'borderBottom';
-			} 
-			if (isCollidingOnTop(obj)) {
-				return 'borderTop';
-			} 
 
 			return '';
 		}

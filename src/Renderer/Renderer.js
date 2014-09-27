@@ -20,7 +20,9 @@ var SQUARE = (function(square) {
 	        context.fillStyle = grd;
 	        context.fill();
 
-			
+			if (!scene.isPaused() && scene.onTick) {
+				scene.tick();
+			}
 
 			for(var i = 0; i < scene.children.length; i++) {
 				if (!scene.isPaused() && scene.children[i].isVisible) {
@@ -38,10 +40,6 @@ var SQUARE = (function(square) {
 						scene.children[i].render(context);
 					}
 				}
-			}
-
-			if (!scene.isPaused() && scene.onTick) {
-				scene.tick();
 			}
 		}
 

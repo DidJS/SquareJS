@@ -27,6 +27,22 @@
 			"fillStyle" : "#000000"
 		},
 		{
+			"id" : "ground3",
+			"x" : 200, 
+			"y" : 325, 
+			"width" : 40, 
+			"height" : 5, 
+			"fillStyle" : "#000000"
+		},
+		{
+			"id" : "ground4",
+			"x" : 210, 
+			"y" : 115, 
+			"width" : 20, 
+			"height" : 5, 
+			"fillStyle" : "#000000"
+		},
+		{
 			"id" : "box1",
 			"x" : 50, 
 			"y" : 260, 
@@ -166,54 +182,57 @@
 	"triangles" : [
 		{
 			"x" : 200,
-			"y" : 330,
+			"y" : 325,
 			"vertex1" : {
 				"x" : 220,
-				"y" : 330
+				"y" : 325
 			},
 			"vertex2" : {
 				"x" : 210,
-				"y" : 310
+				"y" : 315
 			},
 			"vertex3" : {
 				"x" : 200, 
-				"y" : 330
+				"y" : 325
 			},
-			"fillStyle" : "#000000"
+			"fillStyle" : "#000000",
+			"mode" : "horizontal"
 		},
 		{
 			"x" : 220,
-			"y" : 330,
+			"y" : 325,
 			"vertex1" : {
 				"x" : 240,
-				"y" : 330
+				"y" : 325
 			},
 			"vertex2" : {
 				"x" : 230,
-				"y" : 310
+				"y" : 315
 			},
 			"vertex3" : {
 				"x" : 220, 
-				"y" : 330
+				"y" : 325
 			},
-			"fillStyle" : "#000000"
+			"fillStyle" : "#000000",
+			"mode" : "horizontal"
 		},
 		{
 			"x" : 210,
-			"y" : 120,
+			"y" : 115,
 			"vertex1" : {
 				"x" : 230,
-				"y" : 120
+				"y" : 115
 			},
 			"vertex2" : {
 				"x" : 220,
-				"y" : 100
+				"y" : 105
 			},
 			"vertex3" : {
 				"x" : 210, 
-				"y" : 120
+				"y" : 115
 			},
-			"fillStyle" : "#000000"
+			"fillStyle" : "#000000",
+			"mode" : "horizontal"
 		}
 	],
 	"circles" : [

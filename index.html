@@ -84,6 +84,8 @@
 					lifeBar.timeBetweenFrames = (1 / (lifeBar.width / lifetime)) / 2;
 					lifeBar.referenceTime = new Date().getDate();
 
+					var looserText = SQUARE.createText({id : 'winnerText', text : 'Perdu! Rejouer? (O)', x : sceneWidth / 2 - 85, y : sceneHeight / 2, font : 'bold 24px cursive sans-serif', isVisible : false, fontColor: 'red'});
+
 					var renderer = SQUARE.getRenderer('mycanvas');
 
 					var scene = SQUARE.createScene();
@@ -91,7 +93,7 @@
 
 					scene.setGradientBackgroundColor({startingColor : 'grey', endingColor : 'lightblue', mode : 'horizontal'});
 
-					scene.addChild(player).addChild(lifeBar);
+					scene.addChild(player).addChild(lifeBar).addChild(looserText);
 					var boxes = [];
 					for (var i = 0; i < obj.boxes.length; i++) {
 						var box = SQUARE.createBox(obj.boxes[i]);
@@ -153,8 +155,6 @@
 						}
 					});
 
-					
-
 					scene.onTick().then(function() {
 						lifeBar.position.x = player.position.x - 3;
 						lifeBar.position.y = player.position.y - 5;
@@ -169,6 +169,7 @@
 						}
 
 						if (lifeBar.width <= 0) {
+							looserText.isVisible = true;
 							gameEnded = true;
 						}
 
@@ -202,26 +203,18 @@
 						}
 					});
 
-					// scene.when(player).onCollisionWith(triangles).then(function(info) {
-					// 	//winnerText.isVisible = true;
-					// 	gameEnded = true;
-					// 	scene.pause();
-					// });
+					scene.when(player).onCollisionWith([triangles[0], triangles[1], triangles[2]]).then(function(info) {
+						looserText.isVisible = true;
+						gameEnded = true;
+						scene.pause();
+					});
 
 					scene.when(player).onCollisionWith(circles).then(function(info) {
 						info.collisioner.isVisible = false;
 						player.score += 5;
 						if (lifeBar.width < 15) {
-							lifeBar.width += 0.5;
+							lifeBar.width += 1;
 						}
-						
-						var infoBonus = SQUARE.createText({text : '+5', x : info.collisioner.position.x, y : info.collisioner.position.y, font : 'bold 8px cursive sans-serif', velY : -1});
-						scene.addChild(infoBonus);
-						scene.when(infoBonus).onCollisionWithBorder().then(function(info) {
-							if (info.where === 'borderTop') {
-								infoBonus.isVisible = false;
-							}
-						});
 					});
 
 					drawScene();
