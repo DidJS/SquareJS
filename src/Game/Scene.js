@@ -101,6 +101,15 @@ var SQUARE = (function(square) {
 			}
 		}
 
+		that.onTick = function() {
+			var self = this;
+			return {
+				then : function(callback) {
+					self.tick = callback;
+				}
+			};
+		}
+
 		return that;
 	}
 

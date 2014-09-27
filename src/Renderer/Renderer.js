@@ -20,6 +20,8 @@ var SQUARE = (function(square) {
 	        context.fillStyle = grd;
 	        context.fill();
 
+			
+
 			for(var i = 0; i < scene.children.length; i++) {
 				if (!scene.isPaused() && scene.children[i].isVisible) {
 					scene.children[i].velY += scene.children[i].gravity;
@@ -36,6 +38,10 @@ var SQUARE = (function(square) {
 						scene.children[i].render(context);
 					}
 				}
+			}
+
+			if (!scene.isPaused() && scene.onTick) {
+				scene.tick();
 			}
 		}
 

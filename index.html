@@ -47,7 +47,8 @@
 
 			var friction = 1.6;
 			var gravity = 0.4;
-			var bounce = 8;
+			var bounce = 7;
+			var lifetime = 5; // seconds
 
 			function createFileLoader(file, callback) {
 				return new Promise(function(resolve, reject) {
@@ -78,6 +79,11 @@
 				loader.then(function(response) {
 					var obj = JSON.parse(response);
 					var player = SQUARE.createBox(obj.player);
+
+					var lifeBar = SQUARE.createBox({x : player.position.x - 3, y : player.position.y - 15, width : 15, height : 3, fillStyle : "#000000"});
+					lifeBar.timeBetweenFrames = (1 / (lifeBar.width / lifetime)) / 2;
+					lifeBar.referenceTime = new Date().getDate();
+
 					var renderer = SQUARE.getRenderer('mycanvas');
 
 					var scene = SQUARE.createScene();
@@ -85,7 +91,7 @@
 
 					scene.setGradientBackgroundColor({startingColor : 'grey', endingColor : 'lightblue', mode : 'horizontal'});
 
-					scene.addChild(player);
+					scene.addChild(player).addChild(lifeBar);
 					var boxes = [];
 					for (var i = 0; i < obj.boxes.length; i++) {
 						var box = SQUARE.createBox(obj.boxes[i]);
@@ -145,7 +151,31 @@
 						if (key.keyCode === direction.RIGHT || key.keyCode === direction.LEFT) {
 							player.velX = 0;
 						}
-					})
+					});
+
+					
+
+					scene.onTick().then(function() {
+						lifeBar.position.x = player.position.x - 3;
+						lifeBar.position.y = player.position.y - 5;
+
+						var timeForThisFrame = new Date().getTime();
+						var timeElapsed = (timeForThisFrame - lifeBar.referenceTime) / 1000;
+
+						if (timeElapsed > lifeBar.timeBetweenFrames) {
+							lifeBar.width -= 0.5;
+							lifeBar.position.x += 0.5;
+							lifeBar.referenceTime = new Date().getTime();
+						}
+
+						if (lifeBar.width <= 0) {
+							gameEnded = true;
+						}
+
+						if (gameEnded) {
+							scene.pause();
+						}
+					});
 
 					scene.when(player).onCollisionWith(boxes).then(function(info) {
 						if (info.where === 'bottom') {
@@ -172,15 +202,19 @@
 						}
 					});
 
-					scene.when(player).onCollisionWith(triangles).then(function(info) {
-						//winnerText.isVisible = true;
-						gameEnded = true;
-						scene.pause();
-					});
+					// scene.when(player).onCollisionWith(triangles).then(function(info) {
+					// 	//winnerText.isVisible = true;
+					// 	gameEnded = true;
+					// 	scene.pause();
+					// });
 
 					scene.when(player).onCollisionWith(circles).then(function(info) {
 						info.collisioner.isVisible = false;
 						player.score += 5;
+						if (lifeBar.width < 15) {
+							lifeBar.width += 0.5;
+						}
+						
 						var infoBonus = SQUARE.createText({text : '+5', x : info.collisioner.position.x, y : info.collisioner.position.y, font : 'bold 8px cursive sans-serif', velY : -1});
 						scene.addChild(infoBonus);
 						scene.when(infoBonus).onCollisionWithBorder().then(function(info) {

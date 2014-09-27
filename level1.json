@@ -2,7 +2,7 @@
 	"player" : {
 		"id" : "player",
 		"x" : 10,
-		"y" : 200,
+		"y" : 290,
 		"width" : 10,
 		"height" : 10,
 		"fillStyle" : "SaddleBrown",
@@ -11,6 +11,7 @@
 	},
 	"boxes" : [
 		{ 
+			"id" : "ground1",
 			"x" : 0, 
 			"y" : 310, 
 			"width" : 200, 
@@ -18,6 +19,7 @@
 			"fillStyle" : "#000000"
 		},
 		{
+			"id" : "ground2",
 			"x" : 240, 
 			"y" : 310, 
 			"width" : 160, 
@@ -25,8 +27,137 @@
 			"fillStyle" : "#000000"
 		},
 		{
+			"id" : "box1",
 			"x" : 50, 
 			"y" : 260, 
+			"width" : 39, 
+			"height" : 20, 
+			"fillStyle" : "#000000"
+		},
+		{
+			"id" : "box2",
+			"x" : 330, 
+			"y" : 260, 
+			"width" : 39, 
+			"height" : 20, 
+			"fillStyle" : "#000000"
+		},
+		{
+			"id" : "box3",
+			"x" : 270, 
+			"y" : 220, 
+			"width" : 39, 
+			"height" : 20, 
+			"fillStyle" : "#000000"
+		},
+		{
+			"id" : "box4",
+			"x" : 180, 
+			"y" : 220, 
+			"width" : 39, 
+			"height" : 20, 
+			"fillStyle" : "#000000"
+		},
+		{
+			"id" : "box5",
+			"x" : 100, 
+			"y" : 190, 
+			"width" : 39, 
+			"height" : 20, 
+			"fillStyle" : "#000000"
+		},
+		{
+			"id" : "box6",
+			"x" : 30, 
+			"y" : 160, 
+			"width" : 39, 
+			"height" : 20, 
+			"fillStyle" : "#000000"
+		},
+		{
+			"id" : "box7",
+			"x" : 100, 
+			"y" : 130, 
+			"width" : 39, 
+			"height" : 20, 
+			"fillStyle" : "#000000"
+		},
+		{
+			"id" : "box8",
+			"x" : 160, 
+			"y" : 100, 
+			"width" : 50, 
+			"height" : 20, 
+			"fillStyle" : "#000000"
+		},
+		{
+			"id" : "box9",
+			"x" : 230, 
+			"y" : 100, 
+			"width" : 50, 
+			"height" : 20, 
+			"fillStyle" : "#000000"
+		},
+		{
+			"id" : "box10",
+			"x" : 300, 
+			"y" : 70, 
+			"width" : 39, 
+			"height" : 20, 
+			"fillStyle" : "#000000"
+		},
+		{
+			"id" : "box11",
+			"x" : 340, 
+			"y" : 120, 
+			"width" : 39, 
+			"height" : 20, 
+			"fillStyle" : "#000000"
+		},
+		{
+			"id" : "box12",
+			"x" : 290, 
+			"y" : 160, 
+			"width" : 39, 
+			"height" : 20, 
+			"fillStyle" : "#000000"
+		},
+		{
+			"id" : "box13",
+			"x" : 100, 
+			"y" : 70, 
+			"width" : 39, 
+			"height" : 20, 
+			"fillStyle" : "#000000"
+		},
+		{
+			"id" : "box14",
+			"x" : 160, 
+			"y" : 40, 
+			"width" : 39, 
+			"height" : 20, 
+			"fillStyle" : "#000000"
+		},
+		{
+			"id" : "box15",
+			"x" : 241, 
+			"y" : 40, 
+			"width" : 39, 
+			"height" : 20, 
+			"fillStyle" : "#000000"
+		},
+		{
+			"id" : "box16",
+			"x" : 90, 
+			"y" : 20, 
+			"width" : 39, 
+			"height" : 20, 
+			"fillStyle" : "#000000"
+		},
+		{
+			"id" : "box17",
+			"x" : 20, 
+			"y" : 100, 
 			"width" : 39, 
 			"height" : 20, 
 			"fillStyle" : "#000000"
@@ -64,6 +195,23 @@
 			"vertex3" : {
 				"x" : 220, 
 				"y" : 330
+			},
+			"fillStyle" : "#000000"
+		},
+		{
+			"x" : 210,
+			"y" : 120,
+			"vertex1" : {
+				"x" : 230,
+				"y" : 120
+			},
+			"vertex2" : {
+				"x" : 220,
+				"y" : 100
+			},
+			"vertex3" : {
+				"x" : 210, 
+				"y" : 120
 			},
 			"fillStyle" : "#000000"
 		}
