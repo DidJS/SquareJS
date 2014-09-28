@@ -8,7 +8,7 @@
 			}
 			#main-div {
 		     width: 400px;
-		     height:330px;
+		     height:360px;
 		     margin: 0px auto;
 		     margin-top: 70px;
     		 vertical-align: middle;
@@ -30,7 +30,7 @@
 	<body onload='play()'>
 		<div id='title'>Squary adventure</div>
 		<div id='main-div'>
-			<canvas id="mycanvas" width="400" height="330" style="border:1px solid #000;">
+			<canvas id="mycanvas" width="400" height="360" style="border:1px solid #000;">
 				Your browser does not support canvas!
 			</canvas>	
 		</div>
@@ -43,12 +43,12 @@
 	            DOWN  : 40
 	        };
 
-	        var sceneWidth = 400, sceneHeight = 330;
+	        var sceneWidth = 400, sceneHeight = 360;
 
 			var friction = 1.6;
 			var gravity = 0.4;
 			var bounce = 7;
-			var lifetime = 5; // seconds
+			var lifetime = 50; // seconds
 
 			function createFileLoader(file, callback) {
 				return new Promise(function(resolve, reject) {
@@ -75,47 +75,53 @@
 			function play() {
 				var gameEnded = false;
 
-				var loader = createFileLoader('level1.json', null);
-				loader.then(function(response) {
-					var obj = JSON.parse(response);
-					var player = SQUARE.createBox(obj.player);
+				var boxWidth = 20;
+				var boxHeight = 20;
+				var circleSpace = 15;
+				var circleRadius = 4;
 
-					var lifeBar = SQUARE.createBox({x : player.position.x - 3, y : player.position.y - 15, width : 15, height : 3, fillStyle : "#000000"});
-					lifeBar.timeBetweenFrames = (1 / (lifeBar.width / lifetime)) / 2;
-					lifeBar.referenceTime = new Date().getDate();
-
-					var looserText = SQUARE.createText({id : 'winnerText', text : 'Perdu! Rejouer? (O)', x : sceneWidth / 2 - 85, y : sceneHeight / 2, font : 'bold 24px cursive sans-serif', isVisible : false, fontColor: 'red'});
-
+				var loader = createFileLoader('level1.txt', null).then(function(response) {
 					var renderer = SQUARE.getRenderer('mycanvas');
 
 					var scene = SQUARE.createScene();
 					scene.activeBorder(true);
-
 					scene.setGradientBackgroundColor({startingColor : 'grey', endingColor : 'lightblue', mode : 'horizontal'});
 
-					scene.addChild(player).addChild(lifeBar).addChild(looserText);
 					var boxes = [];
-					for (var i = 0; i < obj.boxes.length; i++) {
-						var box = SQUARE.createBox(obj.boxes[i]);
-						boxes.push(box);
-						scene.addChild(box);
-					}
-
-					var triangles = [];
-
-					for (var i = 0; i < obj.triangles.length; i++) {
-						var triangle = SQUARE.createTriangle(obj.triangles[i]);
-						triangles.push(triangle);
-						scene.addChild(triangle);
-					}
-
 					var circles = [];
 
-					for (var i = 0; i < obj.circles.length; i++) {
-						var circle = SQUARE.createCircle(obj.circles[i]);
-						circles.push(circle);
-						scene.addChild(circle);
+					var player;
+
+					var level = response.split(/[\r\n]+/);
+					for (var y = 0; y < level.length; y++) {
+						for (var x = 0; x < level[y].length; x++) {
+							if (level[y][x] === 'b') {
+								var box = SQUARE.createBox({x : x * boxWidth, y : y * boxHeight, width : boxWidth, height : boxHeight});
+								boxes.push(box);
+								scene.addChild(box);
+							}
+							if (level[y][x] === 'o') {
+								var circle = SQUARE.createCircle({x : (x * boxWidth) + (boxWidth / 2), y : (y * boxHeight) + (boxHeight / 2) + 5, radius : circleRadius, fillStyle : "#008000"});
+								circles.push(circle);
+								scene.addChild(circle);
+							}
+							if (level[y][x] === 'p') {
+								player = SQUARE.createBox({id : 'player', x : x * 10, y : y * 10, width : 10, height : 10, gravity : gravity, fillStyle : "SaddleBrown"});
+								scene.addChild(player);
+							}
+						}
 					}
+
+
+					var lifeBar = SQUARE.createBox({x : player.position.x - 3, y : player.position.y - 15, width : 15, height : 3, fillStyle : "#000000"});
+					lifeBar.timeBetweenFrames = (1 / (lifeBar.width / lifetime)) / 2;
+					lifeBar.referenceTime = new Date().getDate();
+					scene.addChild(lifeBar);
+
+					var looserText = SQUARE.createText({id : 'winnerText', text : 'Perdu! Rejouer? (O)', x : sceneWidth / 2 - 85, y : sceneHeight / 2, font : 'bold 24px cursive sans-serif', isVisible : false, fontColor: 'blue'});
+					var pauseText = SQUARE.createText({id : 'pauseText', text : 'Pause...', x : sceneWidth / 2 - 55, y : sceneHeight / 2, font : 'bold 24px cursive sans-serif', isVisible : false, fontColor: 'crimson'});
+
+					scene.addChild(looserText).addChild(pauseText);
 
 					var keyboard = scene.keyboard.create();
 
@@ -132,6 +138,7 @@
 							if (key.keyCode === direction.UP) {
 								if (!player.isJumping) {
 									player.velY = -bounce;
+									player.isGrounded = false;
 									player.isJumping = true;
 								}
 							}
@@ -156,16 +163,17 @@
 					});
 
 					scene.onTick().then(function() {
+						var now = new Date().getTime();
 						lifeBar.position.x = player.position.x - 3;
 						lifeBar.position.y = player.position.y - 5;
 
-						var timeForThisFrame = new Date().getTime();
+						var timeForThisFrame = now;
 						var timeElapsed = (timeForThisFrame - lifeBar.referenceTime) / 1000;
 
 						if (timeElapsed > lifeBar.timeBetweenFrames) {
 							lifeBar.width -= 0.5;
 							lifeBar.position.x += 0.5;
-							lifeBar.referenceTime = new Date().getTime();
+							lifeBar.referenceTime = now;
 						}
 
 						if (lifeBar.width <= 0) {
@@ -176,15 +184,19 @@
 						if (gameEnded) {
 							scene.pause();
 						}
+
+						player.isGrounded = false;
 					});
 
 					scene.when(player).onCollisionWith(boxes).then(function(info) {
 						if (info.where === 'bottom') {
 							player.velY = -player.velY;
+							player.position.y = info.collisioner.position.y + info.collisioner.height + 3;
 						}
 
 						if (info.where === 'top') {
 							player.isJumping = false;
+							player.isGrounded = true;
 							player.position.y = info.collisioner.position.y - player.height;
 							player.position.x += info.collisioner.velX;
 							player.velY = 0;
@@ -201,12 +213,6 @@
 							player.position.x = info.collisioner.position.x + info.collisioner.width;
 							player.velX = 0;
 						}
-					});
-
-					scene.when(player).onCollisionWith([triangles[0], triangles[1], triangles[2]]).then(function(info) {
-						looserText.isVisible = true;
-						gameEnded = true;
-						scene.pause();
 					});
 
 					scene.when(player).onCollisionWith(circles).then(function(info) {
@@ -237,9 +243,11 @@
 					}
 
 					if (info.where === 'borderBottom') {
-						player.velY = 0;
-						player.position.y = sceneHeight - player.height;
-						player.isJumping = false;
+						looserText.isVisible = true;
+						gameEnded = true;
+						// player.velY = 0;
+						// player.position.y = sceneHeight - player.height;
+						// player.isJumping = false;
 					}
 				});
 

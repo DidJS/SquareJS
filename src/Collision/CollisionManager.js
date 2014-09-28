@@ -45,7 +45,7 @@ var SQUARE = (function(square) {
 			var c1X = obj1.getCenterPositionX();
 			var c2X = obj2.getCenterPositionX();
 
-			var overlapX = (obj1.halfWidth + obj2.halfWidth) - Math.abs(c1X - c2X); // distance entre les centres en X
+			var overlapX = Math.floor(Math.round(obj1.halfWidth + obj2.halfWidth) - Math.round(Math.abs(c1X - c2X))); // distance entre les centres en X
 			
 			if (overlapX <= 0) {
 				return '';
@@ -54,20 +54,20 @@ var SQUARE = (function(square) {
 			var c1Y = obj1.getCenterPositionY();
 			var c2Y = obj2.getCenterPositionY();
 
-			var overlapY = (obj1.halfHeight + obj2.halfHeight) - Math.abs(c1Y - c2Y); // distance entre les centres en Y
+			var overlapY = Math.floor(Math.round(obj1.halfHeight + obj2.halfHeight) - Math.round(Math.abs(c1Y - c2Y))); // distance entre les centres en Y
 
 			if (overlapY <= 0) {
 				return '';
 			}
 			
 			if (overlapX < overlapY) {
-				if (c1X - c2X < 0) {
+				if (c1X - c2X <= 0) {
 					return 'left';
 				}
 				return 'right';
 			}
 			else {
-				if (c1Y - c2Y < 0) {
+				if (c1Y - c2Y <= 0) {
 					return 'top';
 				}
 				return 'bottom';

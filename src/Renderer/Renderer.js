@@ -20,7 +20,7 @@ var SQUARE = (function(square) {
 	        context.fillStyle = grd;
 	        context.fill();
 
-			if (!scene.isPaused() && scene.onTick) {
+			if (!scene.isPaused() && scene.tick) {
 				scene.tick();
 			}
 
