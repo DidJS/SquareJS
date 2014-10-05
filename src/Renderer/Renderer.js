@@ -28,11 +28,14 @@ var SQUARE = (function(square) {
 				if (!scene.isPaused() && scene.children[i].isVisible) {
 					scene.children[i].velY += scene.children[i].gravity;
 
-					scene.children[i].position.x += scene.children[i].velX;
-					scene.children[i].position.y += scene.children[i].velY;
+					scene.children[i].position.y = (scene.children[i].position.y + scene.children[i].velY);
+					scene.children[i].position.x = (scene.children[i].position.x + scene.children[i].velX);
 
 					scene.check(scene.children[i]);
-					
+
+					scene.children[i].oldPosition.x = scene.children[i].position.x; 
+					scene.children[i].oldPosition.y = scene.children[i].position.y;
+
 					scene.children[i].render(context);
 				}
 				else {

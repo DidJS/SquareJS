@@ -41,33 +41,142 @@ var SQUARE = (function(square) {
 	square.createBoxCollisionManager = function() {
 		var that = {};
 
+		function support(shape1, shape2, directionVector) {
+			var p1 = shape1.getFartherPointFromDirection(directionVector);
+			var p2 = shape2.getFartherPointFromDirection(square.createPosition({x : -directionVector.x, y : -directionVector.y}));
+
+			// Minkowski difference
+			var p3 = square.createPosition({x : p1.x - p2.x, y : p1.y - p2.y});
+
+			return p3;
+		}
+
+		function containsOrigin(simplex, directionVector) {
+			var indexb = 1;
+			var indexc = 0;
+			// Get the last point added to the simplex
+			var a = simplex[simplex.length - 1];
+
+			// Compute AO : same as -A
+			var ao = square.createPosition({x : -a.x, y : -a.y});
+
+			// If triangle
+			if (simplex.length === 3) {
+				// get b and c
+				var b = simplex[indexb];
+				var c = simplex[indexc];
+
+				var ab = square.createPosition({x : b.x - a.x, y : b.y - a.y});
+				var ac = square.createPosition({x : c.x - a.x, y : c.y - a.y});
+
+				// direction perpendicular to AB
+				directionVector = square.createPosition({x : -ab.y, y : ab.x});
+
+				// away from C
+				// if same direction, make directionVector opposite
+				if (directionVector.dot(c) > 0) {
+					directionVector.negate();
+				}
+
+				if (directionVector.dot(ao) > 0) {
+					simplex.splice(indexc, 1); // remove C
+					indexb -= 1;
+					return { ok : false, directionVector : directionVector};
+				}
+
+				var oldDirectionVector = square.createPosition({x : -directionVector.y, y : directionVector.x});
+				// direction to be perpendicular to AC
+				directionVector = square.createPosition({x : -ac.y, y : ac.x});
+
+				if (directionVector.dot(b) > 0) {
+					directionVector.negate();
+				}
+
+				if (directionVector.dot(ao) > 0) {
+					simplex.splice(indexb, 1); //
+					return {ok : false, directionVector : directionVector};
+				}
+
+				return {ok : true, directionVector : directionVector}; // origin is in triangle, this is the simplex
+			}
+			else { // this is the line segment
+				var b = simplex[0];
+				var ab = square.createPosition({x : b.x - a.x, y : b.y - a.y});
+
+				directionVector = square.createPosition({x : -ab.y, y : ab.x});
+
+				if (directionVector.dot(ao) > 0) {
+					directionVector.negate();
+				}
+			}
+
+			return {ok : false, directionVector : directionVector};
+		}
+
 		that.boxWithBoxCollision = function(obj1, obj2) {
+			// var simplex = [];
+
+			// var directionVector = square.createPosition({x : 1, y : -1});
+			// simplex.push(support(obj1, obj2, directionVector));
+
+			// directionVector.negate();
+
+			// while(true) {
+			// 	// Adding a second point to the simplex, because we need at least 2 points
+			// 	simplex.push(support(obj1, obj2, directionVector));
+			// 	if (simplex[simplex.length - 1].dot(directionVector) <= 0) {
+					
+			// 		return '';
+			// 	}
+			// 	else {
+			// 		var containResult = containsOrigin(simplex, directionVector);
+			// 		if (containResult.ok) {
+			// 			if (containResult.directionVector.y < 0) {
+			// 				return 'top';
+			// 			}
+			// 			if (containResult.directionVector.y > 0) {
+			// 				return 'bottom';
+			// 			}
+			// 			if (containResult.directionVector.x > 0) {
+			// 				return 'right';
+			// 			}
+						
+			// 			return 'c';
+						
+			// 		}
+			// 		directionVector = containResult.directionVector;
+			// 	}
+			// }
+
 			var c1X = obj1.getCenterPositionX();
 			var c2X = obj2.getCenterPositionX();
+			var c1Y = obj1.getCenterPositionY();
+			var c2Y = obj2.getCenterPositionY();
 
-			var overlapX = Math.floor(Math.round(obj1.halfWidth + obj2.halfWidth) - Math.round(Math.abs(c1X - c2X))); // distance entre les centres en X
+			var normal = square.createPosition({x : (c1X - c2X), y : (c1Y - c2Y)});
+
+			var overlapX = (obj1.halfWidth + obj2.halfWidth - Math.abs(normal.x)); // distance entre les centres en X
 			
 			if (overlapX <= 0) {
 				return '';
 			}
 
-			var c1Y = obj1.getCenterPositionY();
-			var c2Y = obj2.getCenterPositionY();
+			
 
-			var overlapY = Math.floor(Math.round(obj1.halfHeight + obj2.halfHeight) - Math.round(Math.abs(c1Y - c2Y))); // distance entre les centres en Y
+			var overlapY = (obj1.halfHeight + obj2.halfHeight - Math.abs(normal.y)); // distance entre les centres en Y
 
 			if (overlapY <= 0) {
 				return '';
 			}
 			
 			if (overlapX < overlapY) {
-				if (c1X - c2X <= 0) {
+				if (normal.x < 0) {
 					return 'left';
 				}
 				return 'right';
 			}
 			else {
-				if (c1Y - c2Y <= 0) {
+				if (normal.y < 0) {
 					return 'top';
 				}
 				return 'bottom';
@@ -271,6 +380,12 @@ var SQUARE = (function(square) {
 										collisioner : collisioner,
 										where : info
 									});
+								}
+								else {
+									collisioner.collisionTop = false;
+									collisioner.collisionBottom = false;
+									collisioner.collisionRight = false;
+									collisioner.collisionLeft = false;
 								}
 							}
 						});

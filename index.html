@@ -28,8 +28,8 @@
 		<script type="text/javascript" src="src/Game/GameObjects.js" ></script>
 	</head>
 	<body onload='play()'>
-		<div id='title'>Squary adventure</div>
-		<div id='main-div'>
+		<!--<div id='title'>Squary adventure</div>-->
+		<div>
 			<canvas id="mycanvas" width="400" height="360" style="border:1px solid #000;">
 				Your browser does not support canvas!
 			</canvas>	
@@ -91,14 +91,15 @@
 					var circles = [];
 
 					var player;
-
+					var idBox = 0;
 					var level = response.split(/[\r\n]+/);
 					for (var y = 0; y < level.length; y++) {
 						for (var x = 0; x < level[y].length; x++) {
 							if (level[y][x] === 'b') {
-								var box = SQUARE.createBox({x : x * boxWidth, y : y * boxHeight, width : boxWidth, height : boxHeight});
+								var box = SQUARE.createBox({id : 'box_' + idBox, x : (x * boxWidth), y : y * boxHeight, width : boxWidth, height : boxHeight});
 								boxes.push(box);
 								scene.addChild(box);
+								idBox++;
 							}
 							if (level[y][x] === 'o') {
 								var circle = SQUARE.createCircle({x : (x * boxWidth) + (boxWidth / 2), y : (y * boxHeight) + (boxHeight / 2) + 5, radius : circleRadius, fillStyle : "#008000"});
@@ -189,29 +190,92 @@
 					});
 
 					scene.when(player).onCollisionWith(boxes).then(function(info) {
+						// var top = false
+						// var bottom = false;
+
+						// if (player.position.y + player.height > info.collisioner.position.y && player.position.y < info.collisioner.position.y &&
+						// 	(player.position.x + player.width > info.collisioner.position.x || player.position.x < info.collisioner.x + info.collisioner.width)) {
+						// 	player.isJumping = false;
+						// 		player.isGrounded = true;
+						// 		player.position.y = info.collisioner.position.y - player.height;
+						// 		player.position.x += info.collisioner.velX;
+						// 		player.velY = 0;
+						// 		top = true;
+						// }
+						// else if (player.position.y < info.collisioner.position.y + info.collisioner.height && player.position.y + player.height > info.collisioner.position.y + info.collisioner.height &&
+						// 	(player.position.x + player.width > info.collisioner.position.x || player.position.x < info.collisioner.x + info.collisioner.width)) {
+						// 	player.velY = -player.velY;
+						// 		player.position.y = info.collisioner.position.y + info.collisioner.height;
+						// 		bottom = true;
+						// }
+						// else if (player.position.x + player.width > info.collisioner.position.x &&
+						// 	((player.position.y > info.collisioner.position.y && player.position.y + player.height < info.collisioner.position.y + info.collisioner.height))) {
+						// 	player.isJumping = false;
+						// 	player.position.x = info.collisioner.position.x - player.width;
+						// 	player.velX = 0;
+						// }
+						// var vX = (info.collisioner.position.x + (info.collisioner.width / 2)) - (player.position.x + (player.width / 2));
+				  //       var vY = (info.collisioner.position.y + (info.collisioner.height / 2)) - (player.position.y + (player.height / 2));
+				  //       // add the half widths and half heights of the objects
+				  //       var hWidths = (player.width / 2) + (info.collisioner.width / 2);
+				  //       var hHeights = (player.height / 2) + (info.collisioner.height / 2);
+
+				  //       var oX = hWidths - Math.abs(vX); 
+				  //       var oY = hHeights - Math.abs(vY);
+
+				  //       if (oX >= oY) {
+				  //           if (vY > 0) {
+				  //               player.isJumping = false;
+						// 		player.isGrounded = true;
+						// 		player.position.y = info.collisioner.position.y - player.height;
+						// 		player.position.x += info.collisioner.velX;
+						// 		player.velY = 0;
+				  //           } else {
+				  //               player.velY = -player.velY;
+						// 		player.position.y = info.collisioner.position.y + info.collisioner.height;
+				  //           }
+				  //       } else {
+				  //           if (vX > 0) {
+				  //               player.isJumping = false;
+						// 		player.position.x = info.collisioner.position.x - player.width;
+						// 		player.velX = 0;
+				  //           } else {
+				  //               player.isJumping = false;
+						// 		player.position.x = info.collisioner.position.x + info.collisioner.width;
+						// 		player.velX = 0;
+				  //           }
+				  //       }
+						    
+						
 						if (info.where === 'bottom') {
 							player.velY = -player.velY;
-							player.position.y = info.collisioner.position.y + info.collisioner.height + 3;
+							player.position.y = info.collisioner.position.y + info.collisioner.height;
 						}
 
 						if (info.where === 'top') {
 							player.isJumping = false;
 							player.isGrounded = true;
-							player.position.y = info.collisioner.position.y - player.height;
+							player.position.y = (info.collisioner.position.y - player.height);
 							player.position.x += info.collisioner.velX;
 							player.velY = 0;
 						}
 
 						if (info.where === 'left') {
-							player.isJumping = false;
-							player.position.x = info.collisioner.position.x - player.width;
-							player.velX = 0;
+							
+								player.isJumping = false;
+								player.position.x = info.collisioner.position.x - player.width;
+								// if (info.collisioner.getCenterPositionY() < player.getCenterPositionY()) {
+								//player.velX = 0;
+							 //}
 						}
 
 						if (info.where === 'right') {
-							player.isJumping = false;
-							player.position.x = info.collisioner.position.x + info.collisioner.width;
-							player.velX = 0;
+							
+								player.isJumping = false;
+								player.position.x = info.collisioner.position.x + info.collisioner.width;
+								//if (info.collisioner.getCenterPositionY() < player.getCenterPositionY()) {
+								//player.velX = 0;
+							//}
 						}
 					});
 
