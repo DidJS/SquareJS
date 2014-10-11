@@ -96,8 +96,8 @@ var SQUARE = (function(square) {
 			return child;
 		}
 
-		that.activeBorder = function(obj, callback) {
-			collisionManager.setBorderCollisionModeOn(true);
+		that.activeBorder = function(obj, minX, minY, maxX, maxY, callback) {
+			collisionManager.setBorderCollisionModeOn(true, minX, minY, maxX, maxY);
 			collisionManager.registerBehaviourForBorder({subject : obj, callback : function(info) {
 				if (info.where === 'borderLeft') {
 					obj.velX = 0;

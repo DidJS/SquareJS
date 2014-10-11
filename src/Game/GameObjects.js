@@ -25,16 +25,11 @@ var SQUARE = (function(square) {
 
 		that.id = spec.id || Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5);
 		that.position = this.createPosition({x : spec.x, y : spec.y});
-		that.oldPosition = this.createPosition({x : spec.x, y : spec.y});
 		that.fillStyle = spec.fillStyle || 'none';
 		that.velX = spec.velX || 0;
 		that.velY = spec.velY || 0;
 		that.gravity = spec.gravity || 0;
 		that.isVisible = true;
-		that.collisionTop = false;
-		that.collisionBottom = false;
-		that.collisionLeft = false;
-		that.collisionRight = false;
 		if (spec.isVisible === false) {
 			that.isVisible = false;
 		}
@@ -121,22 +116,6 @@ var SQUARE = (function(square) {
 
 		that.render = function(context) {
 			renderer.render(context);
-		}
-
-		that.isInVoronoiRegion1 = function(obj) {
-			return this.position.x < obj.position.x && this.position.y < obj.position.y;
-		}
-
-		that.isInVoronoiRegion2 = function(obj) {
-			return this.position.x > obj.position.x + obj.width && this.position.y < obj.position.y;
-		}
-
-		that.isInVoronoiRegion3 = function(obj) {
-			return this.position.x > obj.position.x + obj.width && this.position.y > obj.position.y + obj.height;
-		}
-
-		that.isInVoronoiRegion4 = function(obj) {
-			return this.position.x < obj.position.x && this.position.y > obj.position.y + obj.height;
 		}
 
 		return that;

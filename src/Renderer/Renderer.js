@@ -33,9 +33,6 @@ var SQUARE = (function(square) {
 
 					scene.check(scene.children[i]);
 
-					scene.children[i].oldPosition.x = scene.children[i].position.x; 
-					scene.children[i].oldPosition.y = scene.children[i].position.y;
-
 					scene.children[i].render(context);
 				}
 				else {

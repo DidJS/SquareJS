@@ -37,210 +37,274 @@
 		</div>
 		<script>
 
-			
-
 	        var sceneWidth = 400, sceneHeight = 360;
 
 			var friction = 1.6;
 			var gravity = 0.4;
-			var bounce = 7;
-			var lifetime = 60; // seconds
+			var bounce = 6.5;
+			var lifetime = 15; // seconds
 
 			function play() {
-				var gameEnded = false;
+				var levelNumber = 1;
+				var renderer = SQUARE.getRenderer('mycanvas');
 
-				var boxWidth = 20;
-				var boxHeight = 20;
-				var circleSpace = 15;
-				var circleRadius = 4;
-
-				var loader = SQUARE.createFileLoader('level1.txt', null).then(function(response) {
-					var renderer = SQUARE.getRenderer('mycanvas');
+				function menu() {
+					var padSelector = 50;
+					var selectedItem = 'easy';
 
 					var scene = SQUARE.createScene();
 					scene.setGradientBackgroundColor({startingColor : 'grey', endingColor : 'lightblue', mode : 'horizontal'});
 
-					var boxes = [];
-					var circles = [];
+					var easyText = scene.text.add({id : 'easyText', text : 'Easy (15 seconds)', x : 100, y : 100, font : 'bold 18px cursive sans-serif', fontColor: 'blue'});
+					var mediumText = scene.text.add({id : 'mediumText', text : 'Medium (10 seconds)', x : 100, y : 150, font : 'bold 18px cursive sans-serif', fontColor: 'blue'});
+					var hardText = scene.text.add({id : 'hardText', text : 'Hard (5 seconds)', x : 100, y : 200, font : 'bold 18px cursive sans-serif', fontColor: 'blue'});
 
-					var player;
-					var idBox = 0;
-					var beginBoxX = -1;
-					var nbBox = 0;
-					var level = response.split(/[\r\n]+/);
-					for (var y = 0; y < level.length; y++) {
-						for (var x = 0; x < level[y].length; x++) {
-							if (level[y][x] === 'b') {
-								if (beginBoxX === -1) {
-									beginBoxX = x;
-								}
-
-								nbBox++;
-							}
-							else {
-								if (nbBox > 0) {
-									var box = scene.shape.add.rectangle({id : 'box_' + idBox, x : (beginBoxX * boxWidth), y : y * boxHeight, width : boxWidth * nbBox, height : boxHeight, fillStyle: '#000000'});
-									boxes.push(box);
-									idBox++;
-									nbBox = 0;
-									beginBoxX = -1;
-								}
-								if (level[y][x] === 'o') {
-									var circle = scene.shape.add.circle({x : (x * boxWidth) + (boxWidth / 2), y : (y * boxHeight) + (boxHeight / 2) + 5, radius : circleRadius, fillStyle : "#008000"});
-									circles.push(circle);
-								}
-								if (level[y][x] === 'p') {
-									player = scene.shape.add.rectangle({id : 'player', x : x * 10, y : y * 10, width : 10, height : 10, gravity : gravity, fillStyle : "SaddleBrown"});
-									player.score = 0;
-								}
-							}
-						}
-						if (nbBox > 0) {
-							var box = scene.shape.add.rectangle({id : 'box_' + idBox, x : (beginBoxX * boxWidth), y : y * boxHeight, width : boxWidth * nbBox, height : boxHeight, fillStyle: '#000000'});
-							boxes.push(box);
-							idBox++;
-							nbBox = 0;
-							beginBoxX = -1;
-						}
-					}
-
-					var bonusEaten = 0;
-
-					var lifeBar = scene.shape.add.rectangle({x : player.position.x - 3, y : player.position.y - 15, width : 15, height : 3, fillStyle : "#000000"});
-					lifeBar.timeBetweenFrames = (1 / (lifeBar.width / lifetime)) / 2;
-					lifeBar.referenceTime = new Date().getDate();
-
-					var looserText = scene.text.add({id : 'looserText', text : 'Perdu! Rejouer? (O)', x : sceneWidth / 2 - 85, y : sceneHeight / 2, font : 'bold 24px cursive sans-serif', isVisible : false, fontColor: 'blue'});
-					var pauseText = scene.text.add({id : 'pauseText', text : 'Pause...', x : sceneWidth / 2 - 55, y : sceneHeight / 2, font : 'bold 24px cursive sans-serif', isVisible : false, fontColor: 'crimson'});
-					var winnerText = scene.text.add({id : 'winnerText', text : 'Gagné! Niveau suivant? (O)', x : sceneWidth / 2 - 85, y : sceneHeight / 2, font : 'bold 24px cursive sans-serif', isVisible : false, fontColor: 'blue'});
-
-					scene.activeBorder(player, function(info) {
-						if (info.where === 'borderBottom') {
-							looserText.isVisible = true;
-							gameEnded = true;
-						}
-					});
+					var selector = scene.shape.add.rectangle({x : 70, y : 90, width : 10, height : 10, fillStyle: 'SaddleBrown'});
 
 					var keyboard = scene.keyboard.create();
-					keyboard.keydown.define(79, function() {
-						if (gameEnded) {
-							play();
-						}					
-					})
-
-					keyboard.keydown.define(80, function() {
-						scene.pause();
-						pauseText.isVisible = !pauseText.isVisible;
-					})
-
-					keyboard.keydown.right(function() {
-						if (!scene.isPaused()) {
-							player.velX = friction;
-						}
-					})
-
-					keyboard.keydown.left(function() {
-						if (!scene.isPaused()) {
-							player.velX = -friction;
-						}
-					})
+					keyboard.keydown.down(function() {
+						selector.position.y += padSelector;
+						renderer.render(scene);
+					});
 
 					keyboard.keydown.up(function() {
-						if (!scene.isPaused()) {
-							if (!player.isJumping) {
-								player.velY = -bounce;
-								player.isGrounded = false;
-								player.isJumping = true;
-							}
+						selector.position.y -= padSelector;
+						renderer.render(scene);
+					});
+
+					keyboard.keydown.define(13, function() {
+						if (selector.position.y === 90) {
+							lifetime = 15;
 						}
+						if (selector.position.y === 90 + padSelector) {
+							lifetime = 10;
+						}
+						if (selector.position.y === 90 + padSelector * 2) {
+							lifetime = 5;
+						}
+
+						playLevel(levelNumber);
 					})
 
-					keyboard.keyup.right(function() {
-						player.velX = 0;
-					});
-
-					keyboard.keyup.left(function() {
-						player.velX = 0;
-					});
-
-					scene.onTick().then(function() {
-						var now = new Date().getTime();
-						lifeBar.position.x = player.position.x - 3;
-						lifeBar.position.y = player.position.y - 5;
-
-						var timeForThisFrame = now;
-						var timeElapsed = (timeForThisFrame - lifeBar.referenceTime) / 1000;
-
-						if (timeElapsed > lifeBar.timeBetweenFrames) {
-							lifeBar.width -= 0.5;
-							lifeBar.position.x += 0.5;
-							lifeBar.referenceTime = now;
+					scene.activeBorder(selector, 60, 90, 200, 220, function(info) {
+						if (info.where === 'borderBottom') {
+							selector.position.y -= padSelector;
+						}
+						if (info.where === 'borderTop') {
+							selector.position.y += padSelector;
 						}
 
-						if (lifeBar.width <= 0) {
-							looserText.isVisible = true;
-							gameEnded = true;
-						}
-
-						if (gameEnded) {
-							scene.pause();
-						}
-
-						player.isGrounded = false;
-					});
-
-
-					scene.when(player).onCollisionWith(boxes).then(function(info) { 
-						if (info.where === 'bottom') {
-							player.velY = -player.velY;
-							player.position.y = info.collisioner.position.y + info.collisioner.height;
-						}
-
-						if (info.where === 'top') {
-							player.isJumping = false;
-							player.isGrounded = true;
-							player.position.y = (info.collisioner.position.y - player.height);
-							player.position.x += info.collisioner.velX;
-							player.velY = 0;
-						}
-
-						if (info.where === 'left') {
-							player.isJumping = false;
-							player.position.x = info.collisioner.position.x - player.width;
-						}
-
-						if (info.where === 'right') {
-							player.isJumping = false;
-							player.position.x = info.collisioner.position.x + info.collisioner.width;
-						}
-					});
-
-					scene.when(player).onCollisionWith(circles).then(function(info) {
-						info.collisioner.isVisible = false;
-						player.score += 5;
-						bonusEaten++
-						if (bonusEaten === circles.length) {
-							winnerText.isVisible = true;
-							gameEnded = true;
-						}
-						if (lifeBar.width < 15) {
-							lifeBar.width += 1;
-						}
-					});
-
-					drawScene();
-
-					function drawScene() {
 						renderer.render(scene);
+					});
 
-						requestAnimationFrame(drawScene);
-					}
+					renderer.render(scene);
+				}
 
-				}, function(error) {
-					console.log(error);
-				});
+				function playLevel(levelNumber) {
+					var gameLost = false;
+					var scene = SQUARE.createScene();
+					scene.setGradientBackgroundColor({startingColor : 'grey', endingColor : 'lightblue', mode : 'horizontal'});
+					
+					var loader = SQUARE.createFileLoader('level' + levelNumber + '.txt', null).then(function(response) {
+						var gameEnded = false;
 
-				
+						var boxWidth = 20;
+						var boxHeight = 20;
+						var circleSpace = 15;
+						var circleRadius = 4;
+
+						
+						scene.setGradientBackgroundColor({startingColor : 'grey', endingColor : 'lightblue', mode : 'horizontal'});
+
+						var boxes = [];
+						var circles = [];
+
+						var player;
+						var idBox = 0;
+						var beginBoxX = -1;
+						var nbBox = 0;
+						var level = response.split(/[\r\n]+/);
+						for (var y = 0; y < level.length; y++) {
+							for (var x = 0; x < level[y].length; x++) {
+								if (level[y][x] === 'b') {
+									if (beginBoxX === -1) {
+										beginBoxX = x;
+									}
+
+									nbBox++;
+								}
+								else {
+									if (nbBox > 0) {
+										var box = scene.shape.add.rectangle({id : 'box_' + idBox, x : (beginBoxX * boxWidth), y : y * boxHeight, width : boxWidth * nbBox, height : boxHeight, fillStyle: '#000000'});
+										boxes.push(box);
+										idBox++;
+										nbBox = 0;
+										beginBoxX = -1;
+									}
+									if (level[y][x] === 'o') {
+										var circle = scene.shape.add.circle({x : (x * boxWidth) + (boxWidth / 2), y : (y * boxHeight) + (boxHeight / 2) + 5, radius : circleRadius, fillStyle : "#008000"});
+										circles.push(circle);
+									}
+									if (level[y][x] === 'p') {
+										player = scene.shape.add.rectangle({id : 'player', x : x * 10, y : y * 10, width : 10, height : 10, gravity : gravity, fillStyle : "SaddleBrown"});
+										player.score = 0;
+									}
+								}
+							}
+							if (nbBox > 0) {
+								var box = scene.shape.add.rectangle({id : 'box_' + idBox, x : (beginBoxX * boxWidth), y : y * boxHeight, width : boxWidth * nbBox, height : boxHeight, fillStyle: '#000000'});
+								boxes.push(box);
+								idBox++;
+								nbBox = 0;
+								beginBoxX = -1;
+							}
+						}
+
+						var bonusEaten = 0;
+
+						var lifeBar = scene.shape.add.rectangle({x : player.position.x - 3, y : player.position.y - 15, width : 15, height : 3, fillStyle : "#000000"});
+						lifeBar.timeBetweenFrames = (1 / (lifeBar.width / lifetime)) / 2;
+						lifeBar.referenceTime = new Date().getDate();
+
+						var looserText = scene.text.add({id : 'looserText', text : 'Perdu! Rejouer? (O)', x : sceneWidth / 2 - 85, y : sceneHeight / 2, font : 'bold 24px cursive sans-serif', isVisible : false, fontColor: 'blue'});
+						var pauseText = scene.text.add({id : 'pauseText', text : 'Pause...', x : sceneWidth / 2 - 55, y : sceneHeight / 2, font : 'bold 24px cursive sans-serif', isVisible : false, fontColor: 'crimson'});
+						var winnerText = scene.text.add({id : 'winnerText', text : 'Gagné! Niveau suivant? (O)', x : sceneWidth / 2 - 85, y : sceneHeight / 2, font : 'bold 24px cursive sans-serif', isVisible : false, fontColor: 'blue'});
+
+						scene.activeBorder(player, 0, 0, sceneWidth, sceneHeight, function(info) {
+							if (info.where === 'borderBottom') {
+								looserText.isVisible = true;
+								gameEnded = true;
+								gameLost = true;
+							}
+						});
+
+						var keyboard = scene.keyboard.create();
+						keyboard.keydown.define(79, function() {
+							if (gameEnded) {
+								if (gameLost) {
+									playLevel(levelNumber);
+								}
+								else {
+									playLevel(++levelNumber);
+								}
+							}					
+						})
+
+						keyboard.keydown.define(80, function() {
+							scene.pause();
+							pauseText.isVisible = !pauseText.isVisible;
+						})
+
+						keyboard.keydown.right(function() {
+							if (!scene.isPaused()) {
+								player.velX = friction;
+							}
+						})
+
+						keyboard.keydown.left(function() {
+							if (!scene.isPaused()) {
+								player.velX = -friction;
+							}
+						})
+
+						keyboard.keydown.up(function() {
+							if (!scene.isPaused()) {
+								if (!player.isJumping) {
+									player.velY = -bounce;
+									player.isGrounded = false;
+									player.isJumping = true;
+								}
+							}
+						})
+
+						keyboard.keyup.right(function() {
+							player.velX = 0;
+						});
+
+						keyboard.keyup.left(function() {
+							player.velX = 0;
+						});
+
+						scene.onTick().then(function() {
+							var now = new Date().getTime();
+							lifeBar.position.x = player.position.x - 3;
+							lifeBar.position.y = player.position.y - 5;
+
+							var timeForThisFrame = now;
+							var timeElapsed = (timeForThisFrame - lifeBar.referenceTime) / 1000;
+
+							if (timeElapsed > lifeBar.timeBetweenFrames) {
+								lifeBar.width -= 0.5;
+								lifeBar.position.x += 0.5;
+								lifeBar.referenceTime = now;
+							}
+
+							if (lifeBar.width <= 0) {
+								looserText.isVisible = true;
+								gameEnded = true;
+							}
+
+							if (gameEnded) {
+								scene.pause();
+							}
+
+							player.isGrounded = false;
+						});
+
+
+						scene.when(player).onCollisionWith(boxes).then(function(info) { 
+							if (info.where === 'bottom') {
+								player.velY = -player.velY;
+								player.position.y = info.collisioner.position.y + info.collisioner.height;
+							}
+
+							if (info.where === 'top') {
+								player.isJumping = false;
+								player.isGrounded = true;
+								player.position.y = (info.collisioner.position.y - player.height);
+								player.position.x += info.collisioner.velX;
+								player.velY = 0;
+							}
+
+							if (info.where === 'left') {
+								player.isJumping = false;
+								player.position.x = info.collisioner.position.x - player.width;
+							}
+
+							if (info.where === 'right') {
+								player.isJumping = false;
+								player.position.x = info.collisioner.position.x + info.collisioner.width;
+							}
+						});
+
+						scene.when(player).onCollisionWith(circles).then(function(info) {
+							info.collisioner.isVisible = false;
+							player.score += 5;
+							bonusEaten++
+							if (bonusEaten === circles.length) {
+								winnerText.isVisible = true;
+								gameEnded = true;
+							}
+							if (lifeBar.width < 15) {
+								lifeBar.width += 1;
+							}
+						});
+
+						drawScene();
+
+						function drawScene() {
+							renderer.render(scene);
+
+							requestAnimationFrame(drawScene);
+						}
+
+					}, function(error) {
+						console.log(error);
+					});
+
+				}
+
+				menu();
 			}
 
 		</script>
