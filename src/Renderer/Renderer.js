@@ -49,7 +49,7 @@ var SQUARE = (function(square) {
 		return that;
 	}
 
-	square.createBoxRenderer = function(obj) {
+	square.createRectangleRenderer = function(obj) {
 		var that = {};
 
 		that.render = function(context) {

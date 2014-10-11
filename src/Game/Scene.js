@@ -11,14 +11,73 @@ var SQUARE = (function(square) {
 			create : function() {
 				var that = {};
 
-				that.when = function(e) {
-					var self = this;
-					return {
-						then : function(callback) {
-							window.addEventListener(e, callback);
-						}
+				var direction = {
+		            RIGHT : 39,
+		            LEFT  : 37,
+		            UP    : 38,
+		            DOWN  : 40
+		        };
+
+		        var keydowns = [];
+		        var keyups = [];
+
+				that.keydown = {
+					right : function(callback) {
+						keydowns.push({keycode : direction.RIGHT, callback : callback});
+					},
+					left : function(callback) {
+						keydowns.push({keycode : direction.LEFT, callback : callback});
+					},
+					up : function(callback) {
+						keydowns.push({keycode : direction.UP, callback : callback});
+					},
+					down : function(callback) {
+						keydowns.push({keycode : direction.DOWN, callback : callback});
+					},
+					define : function(keycode, callback) {
+						keydowns.push({keycode : keycode, callback : callback});
 					}
 				}
+
+				that.keyup = {
+					right : function(callback) {
+						keyups.push({keycode : direction.RIGHT, callback : callback});
+					},
+					left : function(callback) {
+						keyups.push({keycode : direction.LEFT, callback : callback});
+					},
+					up : function(callback) {
+						keyups.push({keycode : direction.UP, callback : callback});
+					},
+					down : function(callback) {
+						keyups.push({keycode : direction.DOWN, callback : callback});
+					}
+				}
+
+				// that.when = function(e) {
+				// 	var self = this;
+				// 	return {
+				// 		then : function(callback) {
+				// 			window.addEventListener(e, callback);
+				// 		}
+				// 	}
+				// }
+
+				window.addEventListener('keydown', function(key) {
+					for(var i = 0; i < keydowns.length; i++) {
+						if (keydowns[i].keycode === key.keyCode) {
+							keydowns[i].callback();
+						}
+					}
+		        });
+
+		        window.addEventListener('keyup', function(key) {
+					for(var i = 0; i < keyups.length; i++) {
+						if (keyups[i].keycode === key.keyCode) {
+							keyups[i].callback();
+						}
+					}
+		        });
 
 				return that;
 			}
@@ -37,8 +96,21 @@ var SQUARE = (function(square) {
 			return child;
 		}
 
-		that.activeBorder = function(activeBorderCollision) {
-			collisionManager.setBorderCollisionModeOn(activeBorderCollision);
+		that.activeBorder = function(obj, callback) {
+			collisionManager.setBorderCollisionModeOn(true);
+			collisionManager.registerBehaviourForBorder({subject : obj, callback : function(info) {
+				if (info.where === 'borderLeft') {
+					obj.velX = 0;
+					obj.position.x = 0;
+				}
+
+				if (info.where === 'borderRight') {
+					obj.velX = 0;
+					obj.position.x = sceneWidth - obj.width;
+				}
+
+				callback(info);
+			}});
 		}
 
 		that.setGradientBackgroundColor = function(spec) {
@@ -78,6 +150,29 @@ var SQUARE = (function(square) {
 			}
 		}
 
+		that.shape = {
+			add : {
+				rectangle : function(spec) {
+					var rectangle = square.createRectangle(spec);
+					that.addChild(rectangle);
+					return rectangle;
+				},
+				circle : function(spec) {
+					var circle = square.createCircle(spec);
+					that.addChild(circle);
+					return circle;
+				}
+			}
+		}
+
+		that.text = {
+			add : function(spec) {
+				var text = square.createText(spec);
+				that.addChild(text);
+				return text;
+			}
+		}
+
 		that.check = function(obj) {
 			collisionManager.check(obj);
 		}
@@ -88,13 +183,6 @@ var SQUARE = (function(square) {
 					return {
 						then : function(callback) {
 							collisionManager.registerBehaviour({subject : obj, objects : collisionObjects, callback : callback});
-						}
-					};
-				},
-				onCollisionWithBorder : function() {
-					return {
-						then : function(callback) {
-							collisionManager.registerBehaviourForBorder({subject : obj, callback : callback});
 						}
 					};
 				}

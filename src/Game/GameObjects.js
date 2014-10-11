@@ -46,7 +46,7 @@ var SQUARE = (function(square) {
 		return that;
 	}
 
-	square.createBox = function(spec) {
+	square.createRectangle = function(spec) {
 		var that = this.createGameObject(spec);
 		
 		that.width = spec.width;
@@ -91,119 +91,7 @@ var SQUARE = (function(square) {
 			return this.position.y + this.halfHeight;
 		}
 
-		var renderer = this.createBoxRenderer(that);
-		that.render = function(context) {
-			renderer.render(context);
-		}
-
-		return that;
-	}
-
-	square.createTriangle = function(spec) {
-		// spec.x = spec.vertex1.x;
-		// spec.y = spec.vertex1.y;
-
-		var that = this.createGameObject(spec);
-		that.type = 'triangle';
-		that.mode = spec.mode;
-
-		that.vertex1 = this.createPosition(spec.vertex1);
-		that.vertex2 = this.createPosition(spec.vertex2);
-		that.vertex3 = this.createPosition(spec.vertex3);
-		
-		that.lengthV1V2 = {v1 : spec.vertex1, v2 : spec.vertex2, length : Math.sqrt((spec.vertex2.x - spec.vertex1.x) * (spec.vertex2.x - spec.vertex1.x) + ((spec.vertex2.y - spec.vertex1.y) * (spec.vertex2.y - spec.vertex1.y)))};
-		that.lengthV1V3 = {v1 : spec.vertex1, v2 : spec.vertex3, length : Math.sqrt((spec.vertex3.x - spec.vertex1.x) * (spec.vertex3.x - spec.vertex1.x) + ((spec.vertex3.y - spec.vertex1.y) * (spec.vertex3.y - spec.vertex1.y)))};
-		that.lengthV2V3 = {v1 : spec.vertex2, v2 : spec.vertex3, length : Math.sqrt((spec.vertex3.x - spec.vertex2.x) * (spec.vertex3.x - spec.vertex2.x) + ((spec.vertex3.y - spec.vertex2.y) * (spec.vertex3.y - spec.vertex2.y)))};
-
-		that.directionVector1 = null;
-		that.directionVector2 = null;
-		that.commonVertex = null;
-
-		(function() {
-			var tabLength = [];
-
-			tabLength.push(that.lengthV1V2);
-			tabLength.push(that.lengthV1V3);
-			tabLength.push(that.lengthV2V3);
-
-
-			function getIndexBase(tab) {
-				var index = 0;
-
-				if (that.lengthV1V2.length === that.lengthV2V3.length) {
-					index = 1;
-				}
-				
-				if (that.lengthV1V2.length === that.lengthV1V3.length) {
-					index = 2;
-				} 
-
-				return index;
-			}
-			
-			var index = getIndexBase(tabLength);
-			that.base = square.createPosition({x : spec.x, y : spec.y});
-
-			tabLength.splice(index, 1);
-
-			var countCommonVertices = [];
-
-			function findVertex(vertex) {
-				var foundVertex = null;
-				for (var i = 0; i < countCommonVertices.length; i++) {
-					if (countCommonVertices[i].vertex === vertex) {
-						foundVertex = countCommonVertices[i];
-						break;
-					}
-				}
-				return foundVertex;
-			}
-
-			for (var i = 0; i < tabLength.length; i++) {
-				var vertex = findVertex(tabLength[i].v1);
-				if (vertex === null) {
-					countCommonVertices.push({vertex : tabLength[i].v1, count : 1});
-				}
-				else {
-					vertex.count++;
-				}
-
-				vertex = findVertex(tabLength[i].v2);
-				if (vertex === null) {
-					countCommonVertices.push({vertex : tabLength[i].v2, count : 1});
-				}
-				else {
-					vertex.count++;
-				}
-			}
-
-			var maxCountVertex = countCommonVertices[0].count;
-
-			for (var i = 0; i < countCommonVertices.length; i++) {
-				if (maxCountVertex < countCommonVertices[i].count) {
-					maxCountVertex = countCommonVertices[i].count;
-					that.commonVertex = countCommonVertices[i].vertex;
-				}
-			}
-
-			that.directionVector1 = square.createPosition({x : tabLength[0].v2.x - tabLength[0].v1.x, y : tabLength[0].v2.y - tabLength[0].v1.y});
-			that.directionVector2 = square.createPosition({x : tabLength[1].v2.x - tabLength[1].v1.x, y : tabLength[1].v2.y - tabLength[1].v1.y});
-
-			that.height = Math.abs(that.base.y - that.commonVertex.y);
-			
-		})();
-		
-		that.getProjectedVector = function(initialVector, directionVector) {
-			var lambda = (directionVector.x * (initialVector.x - that.commonVertex.x) + directionVector.y * (initialVector.y - that.commonVertex.y)) / (directionVector.x * directionVector.x + directionVector.y * directionVector.y)
-			var x = that.commonVertex.x + lambda * directionVector.x;
-			var y = that.commonVertex.y + lambda * directionVector.y;
-
-			return square.createPosition({x : x, y : y});
-		}
-
-		that.center = {position : square.createPosition({x : (that.vertex1.x + that.vertex2.x + that.vertex3.x) / 3, y : (that.vertex1.y + that.vertex2.y + that.vertex3.y) / 3})};
-
-		var renderer = this.createTriangleRenderer(that);
+		var renderer = this.createRectangleRenderer(that);
 		that.render = function(context) {
 			renderer.render(context);
 		}
