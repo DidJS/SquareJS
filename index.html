@@ -30,22 +30,23 @@
 	</head>
 	<body onload='play()'>
 		<div id='title'>Squary adventure</div>
-		<div id='main-div'>
+		<div>
 			<canvas id="mycanvas" width="400" height="360" style="border:1px solid #000;">
 				Your browser does not support canvas!
 			</canvas>	
 		</div>
 		<script>
 
-	        var sceneWidth = 400, sceneHeight = 360;
+	        var sceneWidth = 400;
+	        var sceneHeight = 360;
 
 			var friction = 1.6;
-			var gravity = 0.4;
-			var bounce = 6.5;
-			var lifetime = 15; // seconds
+			var frictionY = 0.9;
+			var gravity = 0.5;
+			var bounce = -8;
+			var lifetime = 150; // seconds
 
 			function play() {
-				var levelNumber = 1;
 				var renderer = SQUARE.getRenderer('mycanvas');
 
 				function menu() {
@@ -83,7 +84,7 @@
 							lifetime = 5;
 						}
 
-						playLevel(levelNumber);
+						playLevel(1);
 					})
 
 					scene.activeBorder(selector, 60, 90, 200, 220, function(info) {
@@ -127,36 +128,20 @@
 						for (var y = 0; y < level.length; y++) {
 							for (var x = 0; x < level[y].length; x++) {
 								if (level[y][x] === 'b') {
-									if (beginBoxX === -1) {
-										beginBoxX = x;
-									}
-
-									nbBox++;
+									var box = scene.shape.add.rectangle({id : 'box_' + idBox, x : (x * boxWidth), y : y * boxHeight, width : boxWidth, height : boxHeight});
+	-								boxes.push(box);
+	-								scene.addChild(box);
+	-								idBox++;
 								}
-								else {
-									if (nbBox > 0) {
-										var box = scene.shape.add.rectangle({id : 'box_' + idBox, x : (beginBoxX * boxWidth), y : y * boxHeight, width : boxWidth * nbBox, height : boxHeight, fillStyle: '#000000'});
-										boxes.push(box);
-										idBox++;
-										nbBox = 0;
-										beginBoxX = -1;
-									}
-									if (level[y][x] === 'o') {
-										var circle = scene.shape.add.circle({x : (x * boxWidth) + (boxWidth / 2), y : (y * boxHeight) + (boxHeight / 2) + 5, radius : circleRadius, fillStyle : "#008000"});
-										circles.push(circle);
-									}
-									if (level[y][x] === 'p') {
-										player = scene.shape.add.rectangle({id : 'player', x : x * 10, y : y * 10, width : 10, height : 10, gravity : gravity, fillStyle : "SaddleBrown"});
-										player.score = 0;
-									}
+								if (level[y][x] === 'o') {
+									var circle = scene.shape.add.circle({x : (x * boxWidth) + (boxWidth / 2), y : (y * boxHeight) + (boxHeight / 2) + 5, radius : circleRadius, fillStyle : "#008000"});
+									circles.push(circle);
 								}
-							}
-							if (nbBox > 0) {
-								var box = scene.shape.add.rectangle({id : 'box_' + idBox, x : (beginBoxX * boxWidth), y : y * boxHeight, width : boxWidth * nbBox, height : boxHeight, fillStyle: '#000000'});
-								boxes.push(box);
-								idBox++;
-								nbBox = 0;
-								beginBoxX = -1;
+								if (level[y][x] === 'p') {
+									player = scene.shape.add.rectangle({id : 'player', x : x * 10, y : y * 10, width : 10, height : 10, gravity : gravity, fillStyle : "SaddleBrown"});
+									player.score = 0;
+								}
+								
 							}
 						}
 
@@ -179,6 +164,13 @@
 						});
 
 						var keyboard = scene.keyboard.create();
+						
+						keyboard.keydown.define(77, function() {
+							if (scene.isPaused() || gameEnded) {
+								menu();
+							}					
+						})
+
 						keyboard.keydown.define(79, function() {
 							if (gameEnded) {
 								if (gameLost) {
@@ -210,7 +202,7 @@
 						keyboard.keydown.up(function() {
 							if (!scene.isPaused()) {
 								if (!player.isJumping) {
-									player.velY = -bounce;
+									player.velY = bounce;
 									player.isGrounded = false;
 									player.isJumping = true;
 								}
@@ -304,7 +296,7 @@
 
 				}
 
-				menu();
+				playLevel(1);
 			}
 
 		</script>

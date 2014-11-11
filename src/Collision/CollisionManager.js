@@ -120,6 +120,8 @@ var SQUARE = (function(square) {
 		var that = {};
 
 		that.boxWithBoxCollision = function(obj1, obj2) {
+			
+
 			var c1X = obj1.getCenterPositionX();
 			var c2X = obj2.getCenterPositionX();
 			var c1Y = obj1.getCenterPositionY();
@@ -130,16 +132,17 @@ var SQUARE = (function(square) {
 			var overlapX = (obj1.halfWidth + obj2.halfWidth - Math.abs(normal.x)); // distance entre les centres en X
 			
 			if (overlapX > 0) {
-				var overlapY = (obj1.halfHeight + obj2.halfHeight - Math.abs(normal.y)); // distance entre les centres en Y
+				var overlapY = (Math.round(obj1.halfHeight + obj2.halfHeight) - Math.abs(normal.y)); // distance entre les centres en Y
 				if (overlapY > 0) {
 					if (overlapX < overlapY) {
+
 						if (normal.x < 0) {
 							return 'left';
 						}
 						return 'right';
 					}
 					else {
-						if (normal.y < 0) {
+						if (normal.y <= 0.1) {
 							return 'top';
 						}
 						return 'bottom';
@@ -311,12 +314,7 @@ var SQUARE = (function(square) {
 										collisioner : collisioner,
 										where : info
 									});
-								}
-								else {
-									collisioner.collisionTop = false;
-									collisioner.collisionBottom = false;
-									collisioner.collisionRight = false;
-									collisioner.collisionLeft = false;
+									return;
 								}
 							}
 						});

@@ -26,14 +26,20 @@ var SQUARE = (function(square) {
 
 			for(var i = 0; i < scene.children.length; i++) {
 				if (!scene.isPaused() && scene.children[i].isVisible) {
-					scene.children[i].velY += scene.children[i].gravity;
 
-					scene.children[i].position.y = (scene.children[i].position.y + scene.children[i].velY);
-					scene.children[i].position.x = (scene.children[i].position.x + scene.children[i].velX);
+					scene.children[i].position.x += scene.children[i].velX;
+					if (scene.children[i].gravity > 0) {
+						scene.children[i].velY += scene.children[i].gravity;
+						
+						scene.children[i].position.y = scene.children[i].position.y + scene.children[i].velY;
+					}
 
+					
 					scene.check(scene.children[i]);
 
+					
 					scene.children[i].render(context);
+					
 				}
 				else {
 					if (scene.isPaused() && scene.children[i].isVisible) {
